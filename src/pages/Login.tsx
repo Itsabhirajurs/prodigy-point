@@ -16,7 +16,19 @@ const Login: React.FC = () => {
 
     const { success, role } = await login(studentId.trim());
     if (success) {
-      if (role === 'faculty') {
+      if (role === 'faculty' || role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  };
+
+  const handleQuickLogin = async (id: string) => {
+    setStudentId(id);
+    const { success, role } = await login(id);
+    if (success) {
+      if (role === 'faculty' || role === 'admin') {
         navigate('/admin/dashboard');
       } else {
         navigate('/dashboard');
@@ -51,7 +63,7 @@ const Login: React.FC = () => {
               <Input
                 id="studentId"
                 type="text"
-                placeholder="Enter your ID"
+                placeholder="Enter your ID (e.g., STU001)"
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 className="w-full h-12 text-base"
@@ -77,13 +89,14 @@ const Login: React.FC = () => {
 
           {/* Demo IDs */}
           <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-3">Try demo student accounts:</p>
+            <p className="text-sm text-muted-foreground text-center mb-3">Quick login as student:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {demoIds.map((id) => (
                 <button
                   key={id}
-                  onClick={() => setStudentId(id)}
-                  className="px-3 py-1.5 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+                  onClick={() => handleQuickLogin(id)}
+                  disabled={isLoading}
+                  className="px-3 py-1.5 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
                 >
                   {id}
                 </button>
@@ -93,13 +106,14 @@ const Login: React.FC = () => {
 
           {/* Faculty IDs */}
           <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-3">Try demo faculty accounts:</p>
+            <p className="text-sm text-muted-foreground text-center mb-3">Quick login as faculty:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {facultyIds.map((id) => (
                 <button
                   key={id}
-                  onClick={() => setStudentId(id)}
-                  className="px-3 py-1.5 text-sm font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                  onClick={() => handleQuickLogin(id)}
+                  disabled={isLoading}
+                  className="px-3 py-1.5 text-sm font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors disabled:opacity-50"
                 >
                   {id}
                 </button>

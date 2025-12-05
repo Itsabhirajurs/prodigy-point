@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+export type AppRole = 'student' | 'faculty' | 'admin';
 
 export interface StudentData {
   student_id: string;
@@ -17,8 +18,8 @@ export interface StudentData {
   score: number;
   risk_level: string;
   prediction: string;
+  role: AppRole;
   last_updated: string;
-  role?: string;
 }
 
 export interface FacultyNote {
@@ -30,20 +31,24 @@ export interface FacultyNote {
 }
 
 interface StudentContextType {
-  student: StudentData | null;
+  currentUser: StudentData | null;
+  student: StudentData | null; // Alias for compatibility
   isLoading: boolean;
   isFaculty: boolean;
-  login: (studentId: string) => Promise<{ success: boolean; role: string }>;
+  isAdmin: boolean;
+  login: (studentId: string) => Promise<{ success: boolean; role?: AppRole }>;
   logout: () => void;
   refreshData: () => Promise<void>;
-  getAllStudents: () => Promise<StudentData[]>;
-  getStudentById: (studentId: string) => Promise<StudentData | null>;
+  getAllStudents: () => StudentData[];
+  getStudentById: (studentId: string) => StudentData | null;
+  updateStudentData: (studentId: string, data: Partial<StudentData>) => boolean;
   addFacultyNote: (studentId: string, note: string) => Promise<boolean>;
-  getFacultyNotes: (studentId: string) => Promise<FacultyNote[]>;
+  getFacultyNotes: (studentId: string) => FacultyNote[];
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
+// Calculate score based on the formula
 export const calculateScore = (data: Partial<StudentData>): number => {
   const {
     attendance = 0,
@@ -79,179 +84,261 @@ export const calculatePrediction = (data: Partial<StudentData>): string => {
     : "Needs Support";
 };
 
+// Demo data - students and faculty
+const createDemoData = (): StudentData[] => {
+  const students: StudentData[] = [
+    {
+      student_id: 'STU001',
+      name: 'Alex Johnson',
+      department: 'Computer Science',
+      semester: '5th',
+      attendance: 92,
+      avg_assignment: 85,
+      avg_quiz: 78,
+      stress_index: 35,
+      social_media_hours: 2.5,
+      travel_time: 30,
+      class_interaction: 8,
+      score: 0,
+      risk_level: '',
+      prediction: '',
+      role: 'student',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'STU002',
+      name: 'Sarah Williams',
+      department: 'Computer Science',
+      semester: '5th',
+      attendance: 68,
+      avg_assignment: 62,
+      avg_quiz: 55,
+      stress_index: 72,
+      social_media_hours: 5.5,
+      travel_time: 45,
+      class_interaction: 3,
+      score: 0,
+      risk_level: '',
+      prediction: '',
+      role: 'student',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'STU003',
+      name: 'Michael Chen',
+      department: 'Electronics',
+      semester: '3rd',
+      attendance: 88,
+      avg_assignment: 91,
+      avg_quiz: 89,
+      stress_index: 28,
+      social_media_hours: 1.5,
+      travel_time: 20,
+      class_interaction: 9,
+      score: 0,
+      risk_level: '',
+      prediction: '',
+      role: 'student',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'STU004',
+      name: 'Emily Davis',
+      department: 'Mechanical',
+      semester: '4th',
+      attendance: 75,
+      avg_assignment: 72,
+      avg_quiz: 68,
+      stress_index: 55,
+      social_media_hours: 4,
+      travel_time: 60,
+      class_interaction: 5,
+      score: 0,
+      risk_level: '',
+      prediction: '',
+      role: 'student',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'STU005',
+      name: 'James Wilson',
+      department: 'Civil',
+      semester: '6th',
+      attendance: 45,
+      avg_assignment: 48,
+      avg_quiz: 42,
+      stress_index: 85,
+      social_media_hours: 7,
+      travel_time: 90,
+      class_interaction: 2,
+      score: 0,
+      risk_level: '',
+      prediction: '',
+      role: 'student',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'FAC001',
+      name: 'Dr. Robert Smith',
+      department: 'Computer Science',
+      semester: 'N/A',
+      attendance: 100,
+      avg_assignment: 100,
+      avg_quiz: 100,
+      stress_index: 0,
+      social_media_hours: 0,
+      travel_time: 0,
+      class_interaction: 10,
+      score: 100,
+      risk_level: 'Low Risk',
+      prediction: 'On Track',
+      role: 'faculty',
+      last_updated: new Date().toISOString(),
+    },
+    {
+      student_id: 'FAC002',
+      name: 'Prof. Maria Garcia',
+      department: 'Electronics',
+      semester: 'N/A',
+      attendance: 100,
+      avg_assignment: 100,
+      avg_quiz: 100,
+      stress_index: 0,
+      social_media_hours: 0,
+      travel_time: 0,
+      class_interaction: 10,
+      score: 100,
+      risk_level: 'Low Risk',
+      prediction: 'On Track',
+      role: 'admin',
+      last_updated: new Date().toISOString(),
+    },
+  ];
+
+  // Calculate scores for all students
+  return students.map(student => {
+    if (student.role !== 'student') return student;
+    const score = calculateScore(student);
+    return {
+      ...student,
+      score: Math.round(score * 100) / 100,
+      risk_level: calculateRiskLevel(score),
+      prediction: calculatePrediction(student),
+    };
+  });
+};
+
+// Initialize demo data
+let demoData = createDemoData();
+let facultyNotes: FacultyNote[] = [];
+
 export const StudentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [student, setStudent] = useState<StudentData | null>(null);
+  const [currentUser, setCurrentUser] = useState<StudentData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFaculty, setIsFaculty] = useState(false);
 
-  const updateStudentScores = useCallback(async (studentData: StudentData) => {
-    const score = calculateScore(studentData);
-    const risk_level = calculateRiskLevel(score);
-    const prediction = calculatePrediction(studentData);
+  const isFaculty = currentUser?.role === 'faculty' || currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
-    if (
-      Math.abs((studentData.score || 0) - score) > 0.01 ||
-      studentData.risk_level !== risk_level ||
-      studentData.prediction !== prediction
-    ) {
-      const { error } = await supabase
-        .from('student_data')
-        .update({
-          score,
-          risk_level,
-          prediction,
-          last_updated: new Date().toISOString(),
-        })
-        .eq('student_id', studentData.student_id);
-
-      if (error) {
-        console.error('Error updating scores:', error);
-        return { ...studentData, score, risk_level, prediction };
-      }
-
-      return { ...studentData, score, risk_level, prediction, last_updated: new Date().toISOString() };
+  const login = useCallback(async (studentId: string): Promise<{ success: boolean; role?: AppRole }> => {
+    setIsLoading(true);
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const user = demoData.find(s => s.student_id === studentId);
+    
+    if (user) {
+      setCurrentUser(user);
+      toast.success(`Welcome, ${user.name}!`);
+      setIsLoading(false);
+      return { success: true, role: user.role };
     }
-
-    return studentData;
+    
+    toast.error('Invalid ID. Please try again.');
+    setIsLoading(false);
+    return { success: false };
   }, []);
 
-  const login = useCallback(async (studentId: string): Promise<{ success: boolean; role: string }> => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('student_data')
-        .select('*')
-        .eq('student_id', studentId)
-        .maybeSingle();
-
-      if (error) {
-        toast.error('Error fetching data');
-        return { success: false, role: '' };
-      }
-
-      if (!data) {
-        toast.error('ID not found');
-        return { success: false, role: '' };
-      }
-
-      const role = data.role || 'student';
-      setIsFaculty(role === 'faculty');
-
-      const updatedStudent = await updateStudentScores(data as StudentData);
-      setStudent(updatedStudent);
-      toast.success(`Welcome, ${updatedStudent.name}!`);
-      return { success: true, role };
-    } catch (err) {
-      toast.error('An error occurred');
-      return { success: false, role: '' };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [updateStudentScores]);
-
   const logout = useCallback(() => {
-    setStudent(null);
-    setIsFaculty(false);
+    setCurrentUser(null);
     toast.info('Logged out successfully');
   }, []);
 
   const refreshData = useCallback(async () => {
-    if (!student) return;
-
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('student_data')
-        .select('*')
-        .eq('student_id', student.student_id)
-        .maybeSingle();
-
-      if (error || !data) {
-        toast.error('Error refreshing data');
-        return;
-      }
-
-      const updatedStudent = await updateStudentScores(data as StudentData);
-      setStudent(updatedStudent);
-      toast.success('Data refreshed successfully');
-    } catch (err) {
-      toast.error('An error occurred');
-    } finally {
-      setIsLoading(false);
+    if (!currentUser) return;
+    
+    const updated = demoData.find(s => s.student_id === currentUser.student_id);
+    if (updated) {
+      setCurrentUser(updated);
+      toast.success('Data refreshed');
     }
-  }, [student, updateStudentScores]);
+  }, [currentUser]);
 
-  const getAllStudents = useCallback(async (): Promise<StudentData[]> => {
-    const { data, error } = await supabase
-      .from('student_data')
-      .select('*')
-      .eq('role', 'student')
-      .order('name');
-
-    if (error) {
-      console.error('Error fetching students:', error);
-      return [];
-    }
-
-    return (data || []) as StudentData[];
+  const getAllStudents = useCallback((): StudentData[] => {
+    return demoData.filter(s => s.role === 'student');
   }, []);
 
-  const getStudentById = useCallback(async (studentId: string): Promise<StudentData | null> => {
-    const { data, error } = await supabase
-      .from('student_data')
-      .select('*')
-      .eq('student_id', studentId)
-      .maybeSingle();
-
-    if (error || !data) return null;
-    return data as StudentData;
+  const getStudentById = useCallback((studentId: string): StudentData | null => {
+    return demoData.find(s => s.student_id === studentId) || null;
   }, []);
+
+  const updateStudentData = useCallback((studentId: string, data: Partial<StudentData>): boolean => {
+    const index = demoData.findIndex(s => s.student_id === studentId);
+    if (index === -1) return false;
+
+    const updated = { ...demoData[index], ...data };
+    const score = calculateScore(updated);
+    
+    demoData[index] = {
+      ...updated,
+      score: Math.round(score * 100) / 100,
+      risk_level: calculateRiskLevel(score),
+      prediction: calculatePrediction(updated),
+      last_updated: new Date().toISOString(),
+    };
+
+    // Update current user if it's the same
+    if (currentUser?.student_id === studentId) {
+      setCurrentUser(demoData[index]);
+    }
+
+    toast.success('Data updated successfully');
+    return true;
+  }, [currentUser]);
 
   const addFacultyNote = useCallback(async (studentId: string, note: string): Promise<boolean> => {
-    if (!student) return false;
+    if (!currentUser) return false;
 
-    const { error } = await supabase
-      .from('faculty_notes')
-      .insert({
-        student_id: studentId,
-        faculty_id: student.student_id,
-        note,
-      });
+    const newNote: FacultyNote = {
+      id: `note_${Date.now()}`,
+      student_id: studentId,
+      faculty_id: currentUser.student_id,
+      note,
+      created_at: new Date().toISOString(),
+    };
 
-    if (error) {
-      toast.error('Error saving note');
-      return false;
-    }
-
+    facultyNotes.unshift(newNote);
     toast.success('Note saved successfully');
     return true;
-  }, [student]);
+  }, [currentUser]);
 
-  const getFacultyNotes = useCallback(async (studentId: string): Promise<FacultyNote[]> => {
-    const { data, error } = await supabase
-      .from('faculty_notes')
-      .select('*')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching notes:', error);
-      return [];
-    }
-
-    return (data || []) as FacultyNote[];
+  const getFacultyNotes = useCallback((studentId: string): FacultyNote[] => {
+    return facultyNotes.filter(n => n.student_id === studentId);
   }, []);
 
   return (
-    <StudentContext.Provider value={{ 
-      student, 
-      isLoading, 
+    <StudentContext.Provider value={{
+      currentUser,
+      student: currentUser, // Alias for compatibility
+      isLoading,
       isFaculty,
-      login, 
-      logout, 
+      isAdmin,
+      login,
+      logout,
       refreshData,
       getAllStudents,
       getStudentById,
+      updateStudentData,
       addFacultyNote,
       getFacultyNotes,
     }}>

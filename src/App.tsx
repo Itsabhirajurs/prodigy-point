@@ -2,8 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { StudentProvider } from "@/context/StudentContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { StudentProvider, useStudent } from "@/context/StudentContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 import Login from "./pages/Login";
@@ -23,6 +23,60 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Protected route wrapper for students
+const StudentRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { student } = useStudent();
+  
+  if (!student) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+// Protected route wrapper for faculty/admin
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { student, isFaculty } = useStudent();
+  
+  if (!student) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (!isFaculty) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+const AppRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Login />} />
+    
+    {/* Student Routes */}
+    <Route element={<StudentRoute><AppLayout /></StudentRoute>}>
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/overall-performance" element={<OverallPerformance />} />
+      <Route path="/insights/attendance" element={<AttendanceInsight />} />
+      <Route path="/insights/assignments" element={<AssignmentInsight />} />
+      <Route path="/insights/quizzes" element={<QuizInsight />} />
+      <Route path="/insights/stress" element={<StressInsight />} />
+      <Route path="/recommendations" element={<Recommendations />} />
+      <Route path="/settings" element={<Settings />} />
+    </Route>
+
+    {/* Admin/Faculty Routes */}
+    <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/students" element={<AllStudents />} />
+      <Route path="/admin/student/:student_id" element={<StudentDetail />} />
+      <Route path="/admin/settings" element={<AdminSettings />} />
+    </Route>
+
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -30,31 +84,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            
-            {/* Student Routes */}
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/overall-performance" element={<OverallPerformance />} />
-              <Route path="/insights/attendance" element={<AttendanceInsight />} />
-              <Route path="/insights/assignments" element={<AssignmentInsight />} />
-              <Route path="/insights/quizzes" element={<QuizInsight />} />
-              <Route path="/insights/stress" element={<StressInsight />} />
-              <Route path="/recommendations" element={<Recommendations />} />
-              <Route path="/settings" element={<Settings />} />
-            </Route>
-
-            {/* Admin/Faculty Routes */}
-            <Route element={<AdminLayout />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/students" element={<AllStudents />} />
-              <Route path="/admin/student/:student_id" element={<StudentDetail />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-            </Route>
-
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </StudentProvider>
     </TooltipProvider>

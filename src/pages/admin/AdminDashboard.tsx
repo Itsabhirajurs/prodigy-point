@@ -15,13 +15,10 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      setIsLoading(true);
-      const data = await getAllStudents();
-      setStudents(data);
-      setIsLoading(false);
-    };
-    fetchStudents();
+    setIsLoading(true);
+    const data = getAllStudents();
+    setStudents(data);
+    setIsLoading(false);
   }, [getAllStudents]);
 
   const totalStudents = students.length;

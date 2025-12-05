@@ -25,18 +25,13 @@ const StudentDetail: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!student_id) return;
-      setIsLoading(true);
-      const [student, fetchedNotes] = await Promise.all([
-        getStudentById(student_id),
-        getFacultyNotes(student_id),
-      ]);
-      setStudentData(student);
-      setNotes(fetchedNotes);
-      setIsLoading(false);
-    };
-    fetchData();
+    if (!student_id) return;
+    setIsLoading(true);
+    const student = getStudentById(student_id);
+    const fetchedNotes = getFacultyNotes(student_id);
+    setStudentData(student);
+    setNotes(fetchedNotes);
+    setIsLoading(false);
   }, [student_id, getStudentById, getFacultyNotes]);
 
   const handleSaveNote = async () => {
@@ -44,7 +39,7 @@ const StudentDetail: React.FC = () => {
     setIsSaving(true);
     const success = await addFacultyNote(student_id, newNote.trim());
     if (success) {
-      const updatedNotes = await getFacultyNotes(student_id);
+      const updatedNotes = getFacultyNotes(student_id);
       setNotes(updatedNotes);
       setNewNote('');
     }

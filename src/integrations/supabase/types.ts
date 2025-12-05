@@ -16,85 +16,147 @@ export type Database = {
     Tables: {
       faculty_notes: {
         Row: {
-          created_at: string
+          created_at: string | null
           faculty_id: string
           id: string
           note: string
           student_id: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           faculty_id: string
           id?: string
           note: string
           student_id: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           faculty_id?: string
           id?: string
           note?: string
           student_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "faculty_notes_faculty_id_fkey"
+            columns: ["faculty_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faculty_notes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      student_data: {
+      profiles: {
         Row: {
-          attendance: number
-          avg_assignment: number
-          avg_quiz: number
-          class_interaction: number
           created_at: string | null
-          department: string
-          last_updated: string | null
-          name: string
-          prediction: string | null
-          risk_level: string | null
-          role: string | null
-          score: number | null
-          semester: string
-          social_media_hours: number
-          stress_index: number
-          student_id: string
-          travel_time: number
+          department: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          semester: number | null
+          student_id: string | null
+          updated_at: string | null
         }
         Insert: {
-          attendance?: number
-          avg_assignment?: number
-          avg_quiz?: number
-          class_interaction?: number
           created_at?: string | null
-          department: string
-          last_updated?: string | null
-          name: string
-          prediction?: string | null
-          risk_level?: string | null
-          role?: string | null
-          score?: number | null
-          semester: string
-          social_media_hours?: number
-          stress_index?: number
-          student_id: string
-          travel_time?: number
+          department?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          semester?: number | null
+          student_id?: string | null
+          updated_at?: string | null
         }
         Update: {
-          attendance?: number
-          avg_assignment?: number
-          avg_quiz?: number
-          class_interaction?: number
           created_at?: string | null
-          department?: string
+          department?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          semester?: number | null
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      student_performance: {
+        Row: {
+          attendance: number | null
+          avg_assignment: number | null
+          avg_quiz: number | null
+          calculated_score: number | null
+          class_interaction: number | null
+          id: string
+          last_updated: string | null
+          prediction: string | null
+          risk_level: string | null
+          social_media_hours: number | null
+          stress_index: number | null
+          student_id: string
+          travel_time: number | null
+        }
+        Insert: {
+          attendance?: number | null
+          avg_assignment?: number | null
+          avg_quiz?: number | null
+          calculated_score?: number | null
+          class_interaction?: number | null
+          id?: string
           last_updated?: string | null
-          name?: string
           prediction?: string | null
           risk_level?: string | null
-          role?: string | null
-          score?: number | null
-          semester?: string
-          social_media_hours?: number
-          stress_index?: number
+          social_media_hours?: number | null
+          stress_index?: number | null
+          student_id: string
+          travel_time?: number | null
+        }
+        Update: {
+          attendance?: number | null
+          avg_assignment?: number | null
+          avg_quiz?: number | null
+          calculated_score?: number | null
+          class_interaction?: number | null
+          id?: string
+          last_updated?: string | null
+          prediction?: string | null
+          risk_level?: string | null
+          social_media_hours?: number | null
+          stress_index?: number | null
           student_id?: string
-          travel_time?: number
+          travel_time?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_performance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -103,10 +165,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "faculty" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -233,6 +305,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "faculty", "admin"],
+    },
   },
 } as const
