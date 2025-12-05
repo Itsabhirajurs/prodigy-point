@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      faculty_notes: {
+        Row: {
+          created_at: string
+          faculty_id: string
+          id: string
+          note: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          faculty_id: string
+          id?: string
+          note: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          faculty_id?: string
+          id?: string
+          note?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       student_data: {
         Row: {
           attendance: number
@@ -26,6 +50,7 @@ export type Database = {
           name: string
           prediction: string | null
           risk_level: string | null
+          role: string | null
           score: number | null
           semester: string
           social_media_hours: number
@@ -44,6 +69,7 @@ export type Database = {
           name: string
           prediction?: string | null
           risk_level?: string | null
+          role?: string | null
           score?: number | null
           semester: string
           social_media_hours?: number
@@ -62,6 +88,7 @@ export type Database = {
           name?: string
           prediction?: string | null
           risk_level?: string | null
+          role?: string | null
           score?: number | null
           semester?: string
           social_media_hours?: number
