@@ -14,13 +14,18 @@ const Login: React.FC = () => {
     e.preventDefault();
     if (!studentId.trim()) return;
 
-    const success = await login(studentId.trim());
+    const { success, role } = await login(studentId.trim());
     if (success) {
-      navigate('/dashboard');
+      if (role === 'faculty') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
   const demoIds = ['STU001', 'STU002', 'STU003', 'STU004', 'STU005'];
+  const facultyIds = ['FAC001', 'FAC002'];
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -41,12 +46,12 @@ const Login: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="studentId" className="block text-sm font-medium text-foreground mb-2">
-                Student ID
+                Student / Faculty ID
               </label>
               <Input
                 id="studentId"
                 type="text"
-                placeholder="Enter your Student ID"
+                placeholder="Enter your ID"
                 value={studentId}
                 onChange={(e) => setStudentId(e.target.value)}
                 className="w-full h-12 text-base"
@@ -63,7 +68,7 @@ const Login: React.FC = () => {
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Login as Student
+                  Login
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -72,7 +77,7 @@ const Login: React.FC = () => {
 
           {/* Demo IDs */}
           <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-3">Try demo accounts:</p>
+            <p className="text-sm text-muted-foreground text-center mb-3">Try demo student accounts:</p>
             <div className="flex flex-wrap gap-2 justify-center">
               {demoIds.map((id) => (
                 <button
@@ -85,11 +90,27 @@ const Login: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* Faculty IDs */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-sm text-muted-foreground text-center mb-3">Try demo faculty accounts:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {facultyIds.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => setStudentId(id)}
+                  className="px-3 py-1.5 text-sm font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                >
+                  {id}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Track your academic performance and get personalized insights
+          Track academic performance and get personalized insights
         </p>
       </div>
     </div>
