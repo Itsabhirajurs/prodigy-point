@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AllStudents from "./pages/admin/AllStudents";
 import StudentDetail from "./pages/admin/StudentDetail";
 import AdminSettings from "./pages/admin/AdminSettings";
+import UserManagement from "./pages/admin/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const AppRoutes = () => (
     {/* Admin/Faculty Routes */}
     <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/users" element={<UserManagement />} />
       <Route path="/admin/students" element={<AllStudents />} />
       <Route path="/admin/student/:student_id" element={<StudentDetail />} />
       <Route path="/admin/settings" element={<AdminSettings />} />

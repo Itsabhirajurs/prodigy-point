@@ -1,43 +1,94 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowRight, Loader2 } from 'lucide-react';
-import { useStudent } from '@/context/StudentContext';
+import { GraduationCap, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { signInWithEmail, requestPasswordReset } from '@/lib/auth';
+import { toast } from 'sonner';
 
 const Login: React.FC = () => {
-  const [studentId, setStudentId] = useState('');
-  const { login, isLoading } = useStudent();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!studentId.trim()) return;
+    setError('');
 
-    const { success, role } = await login(studentId.trim());
-    if (success) {
-      if (role === 'faculty' || role === 'admin') {
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await signInWithEmail(email.trim(), password);
+
+      if (!result.success || !result.user) {
+        setError(result.error || 'Failed to sign in');
+        toast.error(result.error || 'Failed to sign in');
+        return;
+      }
+
+      // Store user in localStorage for context
+      localStorage.setItem('currentUser', JSON.stringify(result.user));
+
+      // Route based on role
+      if (result.user.role === 'admin') {
+        toast.success(`Welcome back, ${result.user.full_name}!`);
+        navigate('/admin/dashboard');
+      } else if (result.user.role === 'faculty') {
+        toast.success(`Welcome back, ${result.user.full_name}!`);
         navigate('/admin/dashboard');
       } else {
+        toast.success(`Welcome back, ${result.user.full_name}!`);
         navigate('/dashboard');
       }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+      toast.error('Failed to sign in');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleQuickLogin = async (id: string) => {
-    setStudentId(id);
-    const { success, role } = await login(id);
-    if (success) {
-      if (role === 'faculty' || role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!resetEmail.trim()) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await requestPasswordReset(resetEmail.trim());
+
+      if (!result.success) {
+        setError(result.error || 'Failed to send reset email');
+        toast.error(result.error || 'Failed to send reset email');
+        return;
       }
+
+      toast.success('Password reset email sent! Check your inbox.');
+      setShowForgotPassword(false);
+      setResetEmail('');
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+      toast.error('Failed to send reset email');
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  const demoIds = ['STU001', 'STU002', 'STU003', 'STU004', 'STU005'];
-  const facultyIds = ['FAC001', 'FAC002'];
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -53,73 +104,133 @@ const Login: React.FC = () => {
 
         {/* Login Card */}
         <div className="bg-card rounded-2xl p-6 card-shadow-lg">
-          <h2 className="text-xl font-semibold text-foreground mb-6 text-center">Welcome Back</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-6 text-center">
+            {showForgotPassword ? 'Reset Password' : 'Welcome Back'}
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-foreground mb-2">
-                Student / Faculty ID
-              </label>
-              <Input
-                id="studentId"
-                type="text"
-                placeholder="Enter your ID (e.g., STU001)"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="w-full h-12 text-base"
-                disabled={isLoading}
-              />
-            </div>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 transition-opacity"
-              disabled={isLoading || !studentId.trim()}
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Login
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Demo IDs */}
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-3">Quick login as student:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {demoIds.map((id) => (
-                <button
-                  key={id}
-                  onClick={() => handleQuickLogin(id)}
+          {!showForgotPassword ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full h-12 text-base"
                   disabled={isLoading}
-                  className="px-3 py-1.5 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-50"
-                >
-                  {id}
-                </button>
-              ))}
-            </div>
-          </div>
+                  required
+                />
+              </div>
 
-          {/* Faculty IDs */}
-          <div className="mt-4 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center mb-3">Quick login as faculty:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {facultyIds.map((id) => (
-                <button
-                  key={id}
-                  onClick={() => handleQuickLogin(id)}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full h-12 text-base"
                   disabled={isLoading}
-                  className="px-3 py-1.5 text-sm font-medium bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors disabled:opacity-50"
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 transition-opacity"
+                disabled={isLoading || !email.trim() || !password.trim()}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(true);
+                    setError('');
+                  }}
+                  className="text-sm text-primary hover:underline"
+                  disabled={isLoading}
                 >
-                  {id}
+                  Forgot your password?
                 </button>
-              ))}
-            </div>
-          </div>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">Email Address</Label>
+                <Input
+                  id="resetEmail"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={resetEmail}
+                  onChange={(e) => {
+                    setResetEmail(e.target.value);
+                    setError('');
+                  }}
+                  className="w-full h-12 text-base"
+                  disabled={isLoading}
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 transition-opacity"
+                disabled={isLoading || !resetEmail.trim()}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  'Send Reset Link'
+                )}
+              </Button>
+
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setResetEmail('');
+                    setError('');
+                  }}
+                  className="text-sm text-primary hover:underline"
+                  disabled={isLoading}
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* Footer */}
