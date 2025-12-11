@@ -42,19 +42,25 @@ export const AdminLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/50">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 -left-40 w-80 h-80 bg-accent/5 rounded-full blur-3xl"></div>
+      </div>
+
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border z-50 px-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-card via-card to-card/50 border-b border-border/50 z-50 px-4 flex items-center justify-between backdrop-blur">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+          <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
             <User className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">{role === 'admin' ? 'Admin Dashboard' : 'Faculty Dashboard'}</h1>
-            <p className="text-xs text-muted-foreground">{displayName}</p>
+            <h1 className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">{role === 'admin' ? 'Admin Dashboard' : 'Faculty Dashboard'}</h1>
+            <p className="text-xs text-muted-foreground font-medium">{displayName}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 hover:bg-destructive/10 hover:text-destructive">
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Logout</span>
         </Button>
