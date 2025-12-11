@@ -20,14 +20,14 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ role }) => {
   ];
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border p-4 z-40">
+    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-gradient-to-b from-card via-card to-card/50 border-r border-border/50 p-4 z-40 backdrop-blur">
       <nav className="space-y-2">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary transition-colors"
-            activeClassName="bg-primary/10 text-primary font-medium"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground font-medium transition-all duration-200 hover:text-foreground hover:bg-secondary/50 hover:shadow-md"
+            activeClassName="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30"
           >
             <item.icon className="w-5 h-5" />
             <span>{item.label}</span>
