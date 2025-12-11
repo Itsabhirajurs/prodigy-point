@@ -112,20 +112,4 @@ export const RiskCard: React.FC<RiskCardProps> = ({ riskLevel, prediction, score
       </div>
     </div>
   );
-
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">Predicted Status</p>
-          <div className={cn('inline-flex items-center gap-2 px-4 py-2 rounded-full', predictionConfig.bg)}>
-            <TrendingUp className={cn('w-5 h-5', predictionConfig.color)} />
-            <span className={cn('font-semibold', predictionConfig.color)}>{prediction}</span>
-          </div>
-        </div>
-
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">Overall Score</p>
-          <p className="text-3xl font-bold text-foreground">{score.toFixed(1)}</p>
-        </div>
-      </div>
-    </div>
-  );
 };
