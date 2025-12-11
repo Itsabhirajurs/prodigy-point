@@ -64,6 +64,7 @@ export const StressChart: React.FC<{ currentValue?: number; data?: StressPoint[]
           </LineChart>
         </ResponsiveContainer>
         )}
+        </div>
       </div>
     </div>
   );
