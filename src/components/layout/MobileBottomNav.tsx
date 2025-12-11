@@ -8,6 +8,7 @@ import {
   Settings 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
@@ -38,6 +39,9 @@ export const MobileBottomNav: React.FC = () => {
             <span className="text-[10px] font-medium">{item.label}</span>
           </NavLink>
         ))}
+        <div className="flex items-center">
+          <ThemeToggle />
+        </div>
       </div>
     </nav>
   );

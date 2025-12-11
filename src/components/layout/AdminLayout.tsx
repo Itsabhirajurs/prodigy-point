@@ -6,6 +6,7 @@ import { AdminMobileNav } from './AdminMobileNav';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { signOut } from '@/lib/auth';
 
 // Local helper to read cached auth user set by Login.tsx
@@ -54,10 +55,13 @@ export const AdminLayout: React.FC = () => {
             <p className="text-xs text-muted-foreground">{displayName}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Logout</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2">
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
+          </Button>
+        </div>
       </header>
 
       <div className="pt-16 flex">

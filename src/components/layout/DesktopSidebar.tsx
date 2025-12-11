@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStudent } from '@/context/StudentContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -130,6 +131,11 @@ export const DesktopSidebar: React.FC = () => {
           ))}
         </div>
       </nav>
+
+      {/* Theme Toggle */}
+      <div className="px-3 py-4 border-t border-border flex justify-center">
+        <ThemeToggle />
+      </div>
     </aside>
   );
 };
