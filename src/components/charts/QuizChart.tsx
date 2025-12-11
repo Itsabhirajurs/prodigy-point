@@ -50,6 +50,7 @@ export const QuizChart: React.FC<{ currentValue?: number; data?: QuizPoint[] }> 
           </BarChart>
         </ResponsiveContainer>
         )}
+        </div>
       </div>
     </div>
   );

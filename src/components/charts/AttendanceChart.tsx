@@ -76,10 +76,11 @@ export const AttendanceChart: React.FC<{ currentValue?: number; data?: Attendanc
               strokeWidth={3}
               dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
               activeDot={{ r: 7, filter: 'drop-shadow(0 0 8px hsl(var(--primary)))'}}
-            />
+            </Line>
           </LineChart>
         </ResponsiveContainer>
         )}
+        </div>
       </div>
     </div>
   );

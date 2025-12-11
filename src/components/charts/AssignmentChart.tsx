@@ -60,10 +60,11 @@ export const AssignmentChart: React.FC<{ currentValue?: number; data?: Assignmen
               stroke="hsl(var(--accent))"
               strokeWidth={3}
               fill="url(#colorAssignment)"
-            />
+            </Area>
           </AreaChart>
         </ResponsiveContainer>
         )}
+        </div>
       </div>
     </div>
   );
