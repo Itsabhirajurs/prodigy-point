@@ -21,26 +21,32 @@ export const QuizChart: React.FC<{ currentValue?: number; data?: QuizPoint[] }> 
   }
 
   return (
-    <div className="bg-card rounded-2xl p-5 card-shadow">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Quiz Scores Timeline</h3>
-      <div className="h-64">
+    <div className="relative overflow-hidden rounded-2xl p-6 card-shadow-lg card-hover animate-slide-up border border-border/50 bg-gradient-to-br from-card via-card to-card/50">
+      {/* Decorative gradient background */}
+      <div className="absolute -right-32 -top-32 w-64 h-64 bg-warning/5 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div className="relative z-10">
+        <h3 className="text-xl font-bold text-foreground mb-1">🎯 Quiz Scores</h3>
+        <p className="text-sm text-muted-foreground mb-6">Performance across all quizzes</p>
+        <div className="h-64">
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">No quiz data available</div>
         ) : (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+            <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} stroke="hsl(var(--border))" />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} stroke="hsl(var(--border))" />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                border: '2px solid hsl(var(--warning))',
+                borderRadius: '10px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
               }}
               formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Score']}
             />
-            <Bar dataKey="score" fill="hsl(var(--warning))" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="score" fill="hsl(var(--warning))" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
         )}

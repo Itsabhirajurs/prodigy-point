@@ -64,40 +64,48 @@ const Dashboard: React.FC = () => {
     return 'danger';
   };
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Your academic overview</p>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header with gradient background */}
+      <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 text-white card-shadow-lg">
+        <div className="absolute -right-20 -top-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute -left-20 -bottom-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="relative z-10">
+          <h1 className="text-4xl font-bold mb-2">Welcome Back, {student.name}!</h1>
+          <p className="text-white/80 text-lg">Let's keep you on track for success</p>
         </div>
       </div>
 
       {/* Student Card */}
       <StudentCard />
 
-      {/* Subject selector */}
+      {/* Subject selector with enhanced design */}
       {student.subject_averages && student.subject_averages.length > 0 && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border rounded-xl px-4 py-3 bg-card/60">
-          <div>
-            <p className="text-sm text-muted-foreground">View metrics for</p>
-            <p className="font-semibold text-foreground">
-              {selectedSubjectId === 'overall'
-                ? 'Overall'
-                : (student.subject_averages.find(s => s.subject_id === selectedSubjectId)?.subject_name || 'Subject')}
-            </p>
+        <div className="glass-effect rounded-2xl px-6 py-4 card-hover">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">📊 View metrics for</p>
+              <p className="text-xl font-bold text-foreground mt-1">
+                {selectedSubjectId === 'overall'
+                  ? 'Overall Performance'
+                  : (student.subject_averages.find(s => s.subject_id === selectedSubjectId)?.subject_name || 'Subject')}
+              </p>
+            </div>
+            <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
+              <SelectTrigger className="w-full sm:w-72 h-12 text-base">
+                <SelectValue placeholder="Select subject" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="overall">📈 Overall</SelectItem>
+                {student.subject_averages.map((s) => (
+                  <SelectItem key={s.subject_id} value={s.subject_id}>
+                    {s.subject_code || s.subject_name} — {s.subject_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Select subject" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="overall">Overall</SelectItem>
-              {student.subject_averages.map((s) => (
-                <SelectItem key={s.subject_id} value={s.subject_id}>
-                  {s.subject_code || s.subject_name} — {s.subject_name}
-                </SelectItem>
-              ))}
+        </div>
+      )}
             </SelectContent>
           </Select>
         </div>

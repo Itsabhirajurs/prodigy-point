@@ -38,47 +38,47 @@ export const DesktopSidebar: React.FC = () => {
   const { student } = useStudent();
 
   return (
-    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col border-r border-border bg-card">
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col border-r border-border/50 bg-gradient-to-b from-card via-card to-card/50 backdrop-blur">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+      <div className="flex items-center gap-3 px-6 py-6 border-b border-border/30 bg-gradient-to-r from-primary/10 to-accent/10">
+        <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
           <GraduationCap className="w-6 h-6 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="font-bold text-foreground">Student Insight</h1>
+          <h1 className="font-bold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Student Insight</h1>
           <p className="text-xs text-muted-foreground">Predictive Dashboard</p>
         </div>
       </div>
 
       {/* Student Info */}
       {student && (
-        <div className="px-4 py-4 border-b border-border">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
-            <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center text-accent-foreground font-semibold">
+        <div className="px-4 py-5 border-b border-border/30">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-secondary/50 to-secondary/30 backdrop-blur border border-border/50 hover:border-primary/50 transition-all">
+            <div className="w-12 h-12 rounded-full gradient-accent flex items-center justify-center text-accent-foreground font-bold shadow-lg">
               {student.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-sm text-foreground truncate">{student.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{student.department}</p>
+              <p className="font-bold text-sm text-foreground truncate">{student.name}</p>
+              <p className="text-xs text-muted-foreground truncate font-medium">{student.department}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-        <div className="space-y-1">
-          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Main</p>
+      <nav className="flex-1 px-3 py-6 space-y-6 overflow-y-auto">
+        <div className="space-y-2">
+          <p className="px-3 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Main</p>
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 hover:shadow-md'
                 )
               }
             >
@@ -88,18 +88,18 @@ export const DesktopSidebar: React.FC = () => {
           ))}
         </div>
 
-        <div className="space-y-1">
-          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Insights</p>
+        <div className="space-y-2">
+          <p className="px-3 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Insights</p>
           {insightItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 hover:shadow-md'
                 )
               }
             >
@@ -109,18 +109,18 @@ export const DesktopSidebar: React.FC = () => {
           ))}
         </div>
 
-        <div className="space-y-1">
-          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</p>
+        <div className="space-y-2">
+          <p className="px-3 text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Actions</p>
           {bottomItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 hover:shadow-md'
                 )
               }
             >
