@@ -3,19 +3,23 @@ import { useNavigate } from 'react-router-dom';
 import { StudentData } from '@/context/StudentContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Send } from 'lucide-react';
-import { toast } from 'sonner';
+import { Eye, MessageSquare } from 'lucide-react';
 
 interface AtRiskTableProps {
   students: StudentData[];
+  onMessageStudent?: (studentId: string) => void;
 }
 
-export const AtRiskTable: React.FC<AtRiskTableProps> = ({ students }) => {
+export const AtRiskTable: React.FC<AtRiskTableProps> = ({ students, onMessageStudent }) => {
   const navigate = useNavigate();
 
-  const sendMotivation = (name: string, e: React.MouseEvent) => {
+  const handleMessage = (studentId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.success(`Motivation message sent to ${name}!`);
+    if (onMessageStudent) {
+      onMessageStudent(studentId);
+    } else {
+      navigate('/admin/messages', { state: { studentId } });
+    }
   };
 
   if (students.length === 0) {
@@ -50,11 +54,21 @@ export const AtRiskTable: React.FC<AtRiskTableProps> = ({ students }) => {
               size="icon"
               variant="ghost"
               className="h-8 w-8"
-              onClick={(e) => sendMotivation(student.name, e)}
+              onClick={(e) => handleMessage(student.id || student.student_id, e)}
+              title="Send message"
             >
-              <Send className="w-4 h-4 text-primary" />
+              <MessageSquare className="w-4 h-4 text-primary" />
             </Button>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/admin/student/${student.student_id}`);
+              }}
+              title="View details"
+            >
               <Eye className="w-4 h-4" />
             </Button>
           </div>

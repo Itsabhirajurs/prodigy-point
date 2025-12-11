@@ -7,6 +7,7 @@ import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 
 const StressInsight: React.FC = () => {
   const { student, isLoading } = useStudent();
+  const stressRecords = student?.stress_records || [];
 
   if (isLoading || !student) {
     return (
@@ -19,40 +20,52 @@ const StressInsight: React.FC = () => {
 
   const getInsights = () => {
     const insights = [];
+    const latestStress = stressRecords[stressRecords.length - 1];
+    const peakStress = stressRecords.reduce(
+      (max, r) => r.stress_index > max.stress_index ? r : max,
+      stressRecords[0] || { week_number: 0, academic_year: '', stress_index: 0, social_media_hours: 0, travel_time_minutes: 0 }
+    );
+    const avgSocial = stressRecords.length > 0
+      ? stressRecords.reduce((sum, r) => sum + (r.social_media_hours || 0), 0) / stressRecords.length
+      : student.social_media_hours;
+    const latestTravel = stressRecords.length > 0 ? (stressRecords[stressRecords.length - 1].travel_time_minutes || 0) : student.travel_time;
+    const currentStress = latestStress?.stress_index ?? student.stress_index;
     
-    if (student.stress_index > 70) {
+    if (currentStress > 70) {
       insights.push({
         type: 'danger',
         icon: AlertTriangle,
         title: 'High Stress Detected',
-        description: 'Your stress levels are above the healthy threshold. Consider speaking with a counselor.',
+        description: `Recent stress index is ${Math.round(currentStress)}. Consider breathing breaks and talking with a counselor.`,
       });
     }
     
-    if (student.social_media_hours > 3) {
+    if (avgSocial > 3) {
       insights.push({
         type: 'warning',
         icon: Smartphone,
         title: 'High Social Media Usage',
-        description: `You're spending ${student.social_media_hours.toFixed(1)} hours/day on social media. Try reducing to under 2 hours.`,
+        description: `You're spending ${avgSocial.toFixed(1)} hours/day on social media. Try reducing to under 2 hours.`,
       });
     }
 
-    if (student.travel_time > 45) {
+    if (latestTravel > 45) {
       insights.push({
         type: 'info',
         icon: Clock,
         title: 'Long Commute Time',
-        description: `Your ${student.travel_time} min commute may be affecting your energy levels and study time.`,
+        description: `Your ${latestTravel} min commute may be affecting your energy levels and study time.`,
       });
     }
 
-    insights.push({
-      type: 'success',
-      icon: Heart,
-      title: 'Stress Spike After Assignment 5',
-      description: 'Your stress increased significantly around Assignment 5. Planning ahead can help manage workload stress.',
-    });
+    if (peakStress && peakStress.week_number) {
+      insights.push({
+        type: peakStress.stress_index > 70 ? 'danger' : 'info',
+        icon: Heart,
+        title: `Peak stress in Week ${peakStress.week_number}`,
+        description: `Stress index hit ${Math.round(peakStress.stress_index)}. Note what happened that week to adjust routines.`,
+      });
+    }
 
     return insights;
   };
@@ -76,7 +89,7 @@ const StressInsight: React.FC = () => {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-card rounded-xl p-4 card-shadow text-center">
           <Brain className="w-6 h-6 mx-auto mb-2 text-destructive" />
-          <p className="text-2xl font-bold text-foreground">{student.stress_index}%</p>
+          <p className="text-2xl font-bold text-foreground">{Math.round(student.stress_index)}%</p>
           <p className="text-xs text-muted-foreground">Stress Index</p>
         </div>
         <div className="bg-card rounded-xl p-4 card-shadow text-center">
@@ -86,14 +99,28 @@ const StressInsight: React.FC = () => {
         </div>
         <div className="bg-card rounded-xl p-4 card-shadow text-center">
           <Clock className="w-6 h-6 mx-auto mb-2 text-accent" />
-          <p className="text-2xl font-bold text-foreground">{student.travel_time}m</p>
+          <p className="text-2xl font-bold text-foreground">{Math.round(student.travel_time)}m</p>
           <p className="text-xs text-muted-foreground">Travel Time</p>
         </div>
       </div>
 
       {/* Charts */}
-      <StressChart currentValue={student.stress_index} />
-      <SocialMediaChart totalHours={student.social_media_hours} />
+      <StressChart
+        currentValue={student.stress_index}
+        data={stressRecords.map((r) => ({
+          week: `Week ${r.week_number}`,
+          stress: r.stress_index,
+          social: r.social_media_hours,
+          travel: r.travel_time_minutes,
+        }))}
+      />
+      <SocialMediaChart
+        totalHours={student.social_media_hours}
+        data={stressRecords.map((r) => ({
+          label: `Week ${r.week_number}`,
+          hours: r.social_media_hours,
+        }))}
+      />
 
       {/* Insights */}
       <div className="space-y-4">

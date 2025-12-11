@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { signInWithEmail, requestPasswordReset } from '@/lib/auth';
+import { signInWithEmail, requestPasswordReset, AuthUser } from '@/lib/auth';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
 const Login: React.FC = () => {
@@ -16,6 +17,64 @@ const Login: React.FC = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const navigate = useNavigate();
+
+  const routeByRole = (user: AuthUser) => {
+    if (user.role === 'admin') {
+      navigate('/admin/users', { replace: true });
+      return;
+    }
+    if (user.role === 'faculty') {
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
+    navigate('/dashboard', { replace: true });
+  };
+
+  // If already authenticated (localStorage or Supabase session), skip login screen
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        const cached = localStorage.getItem('currentUser');
+        if (cached) {
+          const user: AuthUser = JSON.parse(cached);
+          // If cached user doesn't have department, clear and re-login
+          if (!user.department) {
+            console.log('[DEBUG] Cached user missing department, clearing localStorage');
+            localStorage.removeItem('currentUser');
+          } else {
+            routeByRole(user);
+            return;
+          }
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile) return;
+
+        const user: AuthUser = {
+          id: profile.id,
+          email: profile.email,
+          role: profile.role,
+          full_name: profile.full_name,
+          department: profile.department,
+        };
+
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        routeByRole(user);
+      } catch (err) {
+        console.error('Auto login check failed', err);
+      }
+    };
+
+    checkExistingSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +98,10 @@ const Login: React.FC = () => {
 
       // Store user in localStorage for context
       localStorage.setItem('currentUser', JSON.stringify(result.user));
+      console.log('[DEBUG LOGIN] Stored user in localStorage:', result.user);
 
-      // Route based on role
-      if (result.user.role === 'admin') {
-        toast.success(`Welcome back, ${result.user.full_name}!`);
-        navigate('/admin/dashboard');
-      } else if (result.user.role === 'faculty') {
-        toast.success(`Welcome back, ${result.user.full_name}!`);
-        navigate('/admin/dashboard');
-      } else {
-        toast.success(`Welcome back, ${result.user.full_name}!`);
-        navigate('/dashboard');
-      }
+      toast.success(`Welcome back, ${result.user.full_name}!`);
+      routeByRole(result.user);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
       toast.error('Failed to sign in');

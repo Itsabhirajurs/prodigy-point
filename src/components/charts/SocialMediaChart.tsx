@@ -1,7 +1,10 @@
 import React from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Tooltip } from 'recharts';
 
-const generateMockData = () => {
+type SocialMediaPoint = { label: string; hours: number };
+type RadarPoint = { subject: string; hours: number; fullMark: number };
+
+const generateMockData = (): RadarPoint[] => {
   return [
     { subject: 'Instagram', hours: 1.5, fullMark: 5 },
     { subject: 'TikTok', hours: 2.0, fullMark: 5 },
@@ -12,8 +15,22 @@ const generateMockData = () => {
   ];
 };
 
-export const SocialMediaChart: React.FC<{ totalHours?: number }> = ({ totalHours }) => {
-  const data = generateMockData();
+const normalizeData = (data?: SocialMediaPoint[]): RadarPoint[] | null => {
+  if (data === undefined) return generateMockData();
+  if (data.length === 0) return null;
+
+  const maxHours = data.reduce((max, entry) => Math.max(max, entry.hours), 0);
+  const fullMark = Math.max(5, Math.ceil(maxHours + 1));
+
+  return data.map((entry) => ({
+    subject: entry.label,
+    hours: entry.hours,
+    fullMark,
+  }));
+};
+
+export const SocialMediaChart: React.FC<{ totalHours?: number; data?: SocialMediaPoint[] }> = ({ totalHours, data }) => {
+  const chartData = normalizeData(data);
 
   return (
     <div className="bg-card rounded-2xl p-5 card-shadow">
@@ -24,8 +41,11 @@ export const SocialMediaChart: React.FC<{ totalHours?: number }> = ({ totalHours
         )}
       </div>
       <div className="h-64">
+        {chartData === null ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">No social media data available</div>
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data}>
+          <RadarChart data={chartData}>
             <PolarGrid stroke="hsl(var(--border))" />
             <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
             <PolarRadiusAxis angle={30} domain={[0, 5]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
@@ -46,6 +66,7 @@ export const SocialMediaChart: React.FC<{ totalHours?: number }> = ({ totalHours
             />
           </RadarChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

@@ -1,14 +1,23 @@
 import React from 'react';
 import { NavLink } from '@/components/NavLink';
-import { LayoutDashboard, Users, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, FileText } from 'lucide-react';
 
-const navItems = [
-  { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/students', icon: Users, label: 'Students' },
-  { to: '/admin/settings', icon: Settings, label: 'Settings' },
-];
+type Role = 'admin' | 'faculty';
 
-export const AdminMobileNav: React.FC = () => {
+interface AdminMobileNavProps {
+  role: Role;
+}
+
+export const AdminMobileNav: React.FC<AdminMobileNavProps> = ({ role }) => {
+  const navItems = [
+    { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/admin/students', icon: Users, label: 'Students' },
+    ...(role === 'faculty'
+      ? [{ to: '/admin/update-student', icon: FileText, label: 'Update' }]
+      : [{ to: '/admin/users', icon: Users, label: 'Users' }]),
+    { to: '/admin/settings', icon: Settings, label: 'Settings' },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 px-4 py-2">
       <div className="flex justify-around items-center">

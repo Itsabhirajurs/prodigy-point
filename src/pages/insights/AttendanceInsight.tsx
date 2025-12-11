@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { CalendarCheck, TrendingDown, TrendingUp, AlertCircle } from 'lucide-react';
 import { useStudent } from '@/context/StudentContext';
 import { AttendanceChart } from '@/components/charts/AttendanceChart';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AttendanceInsight: React.FC = () => {
   const { student, isLoading } = useStudent();
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('overall');
 
   if (isLoading || !student) {
     return (
@@ -16,33 +18,51 @@ const AttendanceInsight: React.FC = () => {
     );
   }
 
+  const currentSubject = useMemo(
+    () => student.subject_averages?.find((s) => String(s.subject_id) === selectedSubjectId),
+    [student, selectedSubjectId]
+  );
+
+  const filteredRecords = useMemo(() => {
+    if (selectedSubjectId === 'overall') return student.attendance_records || [];
+    return (student.attendance_records || []).filter(r => String(r.subject_id) === selectedSubjectId);
+  }, [student, selectedSubjectId]);
+
+  const avgAttendance = useMemo(() => {
+    if (selectedSubjectId === 'overall') return student.attendance || 0;
+    return currentSubject?.avg_attendance || 0;
+  }, [student, currentSubject, selectedSubjectId]);
+
   const getInsights = () => {
     const insights = [];
-    
-    if (student.attendance < 75) {
+
+    if (avgAttendance < 75) {
       insights.push({
         type: 'warning',
         icon: TrendingDown,
         title: 'Attendance Below Target',
-        description: 'Your attendance dropped below the 75% threshold. This may impact your eligibility for exams.',
+        description: selectedSubjectId === 'overall' ? 'Your overall attendance is below the 75% threshold. This may impact exam eligibility.' : 'Attendance for this subject is below 75%. Focus on improving it.',
       });
     }
     
-    if (student.attendance >= 85) {
+    if (avgAttendance >= 85) {
       insights.push({
         type: 'success',
         icon: TrendingUp,
         title: 'Excellent Attendance',
-        description: 'Great job maintaining high attendance! This correlates with better academic outcomes.',
+        description: 'Great job maintaining high attendance! This correlates with better outcomes.',
       });
     }
 
-    insights.push({
-      type: 'info',
-      icon: AlertCircle,
-      title: 'Week 3 Analysis',
-      description: 'Your attendance dropped sharply in Week 3. Consider reviewing what caused this dip.',
-    });
+    if (filteredRecords.length > 0) {
+      const lowest = filteredRecords.reduce((min, r) => r.attendance_percentage < min.attendance_percentage ? r : min, filteredRecords[0]);
+      insights.push({
+        type: 'info',
+        icon: AlertCircle,
+        title: `Weakest week: Week ${lowest.week_number}${lowest.subject_code ? ` (${lowest.subject_code})` : ''}`,
+        description: `Attendance was ${Math.round(lowest.attendance_percentage)}%. Try to recover in upcoming weeks.`,
+      });
+    }
 
     return insights;
   };
@@ -56,27 +76,50 @@ const AttendanceInsight: React.FC = () => {
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center">
           <CalendarCheck className="w-7 h-7 text-primary-foreground" />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground">Attendance Insight</h1>
           <p className="text-muted-foreground">Track your class attendance patterns</p>
         </div>
+        {/* Subject Selector */}
+        {student.subject_averages && student.subject_averages.length > 0 && (
+          <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select subject" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="overall">Overall</SelectItem>
+              {student.subject_averages.map((subj) => (
+                <SelectItem key={subj.subject_id} value={String(subj.subject_id)}>
+                  {subj.subject_name || subj.subject_code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Current Value Card */}
       <div className="bg-card rounded-2xl p-6 card-shadow">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Current Attendance</p>
-            <p className="text-4xl font-bold text-foreground">{student.attendance}%</p>
+            <p className="text-sm text-muted-foreground">{selectedSubjectId === 'overall' ? 'Overall' : 'Subject'} Attendance</p>
+            <p className="text-4xl font-bold text-foreground">{Math.round(avgAttendance * 10) / 10}%</p>
           </div>
-          <div className={`px-4 py-2 rounded-full ${student.attendance >= 75 ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-            {student.attendance >= 75 ? 'On Track' : 'Needs Improvement'}
+          <div className={`px-4 py-2 rounded-full ${avgAttendance >= 75 ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+            {avgAttendance >= 75 ? 'On Track' : 'Needs Improvement'}
           </div>
         </div>
       </div>
 
       {/* Chart */}
-      <AttendanceChart currentValue={student.attendance} />
+      <AttendanceChart
+        currentValue={avgAttendance}
+        data={filteredRecords.map((r) => ({
+          week: `Week ${r.week_number}`,
+          attendance: r.attendance_percentage,
+          subject: r.subject_code,
+        }))}
+      />
 
       {/* Insights */}
       <div className="space-y-4">

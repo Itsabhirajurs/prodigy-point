@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Download, Eye, Send } from 'lucide-react';
-import { useStudent, StudentData } from '@/context/StudentContext';
+import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,24 +10,170 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { toast } from 'sonner';
 
+interface StudentData {
+  id: string;
+  student_id: string;
+  full_name: string;
+  name: string;
+  email: string;
+  department: string;
+  semester: number | string;
+  attendance?: number;
+  avg_assignment?: number;
+  avg_quiz?: number;
+  stress_index?: number;
+  social_media_hours?: number;
+  travel_time?: number;
+  class_interaction?: number;
+  score?: number;
+  risk_level?: string;
+  prediction?: string;
+  updated_at: string;
+}
+
+const getCachedUser = () => {
+  try {
+    const stored = localStorage.getItem('currentUser');
+    return stored ? JSON.parse(stored) : null;
+  } catch (err) {
+    console.error('Failed to parse cached user', err);
+    return null;
+  }
+};
+
+const canonicalDept = (value: string | undefined | null): string => {
+  const v = (value || '').trim().toLowerCase();
+  if (!v) return '';
+  if (['it', 'information technology'].includes(v)) return 'IT';
+  if (['cse', 'cs', 'computer science', 'computer science and engineering'].includes(v)) return 'CSE';
+  if (['biotech', 'biotechnology'].includes(v)) return 'Biotech';
+  if (['ece', 'ec', 'electronics', 'electronics and communication', 'electronics and communication engineering'].includes(v)) return 'ECE';
+  if (['me', 'mechanical', 'mechanical engineering'].includes(v)) return 'ME';
+  if (['ee', 'eee', 'electrical', 'electrical engineering'].includes(v)) return 'EE';
+  return v.toUpperCase();
+};
+
+const DEPARTMENT_LABELS: Record<string, string> = {
+  IT: 'Information Technology',
+  CSE: 'Computer Science',
+  Biotech: 'Biotechnology',
+  ECE: 'Electronics',
+  ME: 'Mechanical',
+  EE: 'Electrical',
+};
+
 const AllStudents: React.FC = () => {
-  const { getAllStudents } = useStudent();
   const [students, setStudents] = useState<StudentData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [riskFilter, setRiskFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
-  const [sortBy, setSortBy] = useState<keyof StudentData>('name');
+  const [sortBy, setSortBy] = useState<keyof StudentData>('full_name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const navigate = useNavigate();
+  const cachedUser = useMemo(getCachedUser, []);
+  const isAdmin = cachedUser?.role === 'admin';
+  const facultyDept = canonicalDept(cachedUser?.department);
+
+  const deptLabel = (code: string): string => {
+    return DEPARTMENT_LABELS[code] || code;
+  };
+
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    try {
+      // Try to fetch from view first, fallback to students table
+      let data, error;
+      
+      // Attempt 1: Try view
+      let viewQuery = supabase
+        .from('v_student_details')
+        .select('*')
+        .order('updated_at', { ascending: false });
+
+      const viewResult = await viewQuery;
+      
+      if (viewResult.error) {
+        console.warn('View not accessible, fetching from students table:', viewResult.error);
+        // Attempt 2: Fallback to students table
+        let tableQuery = supabase
+          .from('students')
+          .select(`
+            *,
+            student_performance (
+              attendance,
+              avg_assignment,
+              avg_quiz,
+              stress_index,
+              social_media_hours,
+              travel_time,
+              class_interaction,
+              score,
+              risk_level,
+              prediction,
+              updated_at
+            )
+          `)
+          .order('created_at', { ascending: false });
+
+        const tableResult = await tableQuery;
+        
+        data = tableResult.data;
+        error = tableResult.error;
+        
+        if (error) throw error;
+        
+        // Map the joined data
+        const mapped = (data || []).map((s: any) => {
+          const perf = s.student_performance?.[0] || {};
+          return {
+            id: s.id,
+            student_id: s.student_id,
+            full_name: s.full_name,
+            name: s.full_name,
+            email: s.email,
+            department: s.department,
+            semester: String(s.semester),
+            attendance: perf.attendance || 0,
+            avg_assignment: perf.avg_assignment || 0,
+            avg_quiz: perf.avg_quiz || 0,
+            stress_index: perf.stress_index || 0,
+            social_media_hours: perf.social_media_hours || 0,
+            travel_time: perf.travel_time || 0,
+            class_interaction: perf.class_interaction || 0,
+            score: perf.score || 0,
+            risk_level: perf.risk_level || 'Unknown',
+            prediction: perf.prediction || 'Unknown',
+            updated_at: perf.updated_at || s.created_at,
+          };
+        });
+        setStudents(mapped);
+      } else {
+        // View worked, use it
+        const mapped = (viewResult.data || []).map(s => ({
+          ...s,
+          name: s.full_name,
+          semester: String(s.semester),
+        }));
+        setStudents(mapped as StudentData[]);
+      }
+    } catch (err) {
+      console.error('Error fetching students:', err);
+      toast.error('Failed to load students');
+      setStudents([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setIsLoading(true);
-    const data = getAllStudents();
-    setStudents(data);
-    setIsLoading(false);
-  }, [getAllStudents]);
+    fetchStudents();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchStudents, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const departments = useMemo(() => {
     const depts = [...new Set(students.map(s => s.department))];
@@ -71,7 +217,7 @@ const AllStudents: React.FC = () => {
     const rows = filteredStudents.map(s => [
       s.student_id,
       s.name,
-      s.department,
+      deptLabel(s.department),
       s.semester,
       s.attendance,
       s.avg_quiz,
@@ -165,7 +311,7 @@ const AllStudents: React.FC = () => {
           <SelectContent>
             <SelectItem value="all">All Departments</SelectItem>
             {departments.map(dept => (
-              <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+              <SelectItem key={dept} value={dept}>{deptLabel(dept)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -199,55 +345,60 @@ const AllStudents: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredStudents.map((student) => (
-              <TableRow 
-                key={student.student_id}
-                className={(student.score || 0) < 50 ? 'bg-danger/5' : ''}
-              >
-                <TableCell className="font-mono text-sm">{student.student_id}</TableCell>
-                <TableCell className="font-medium">{student.name}</TableCell>
-                <TableCell className="hidden md:table-cell">{student.department}</TableCell>
-                <TableCell className="hidden lg:table-cell">{student.semester}</TableCell>
-                <TableCell>{student.attendance}%</TableCell>
-                <TableCell className="hidden sm:table-cell">{student.avg_quiz}</TableCell>
-                <TableCell className="hidden sm:table-cell">{student.avg_assignment}</TableCell>
-                <TableCell className="hidden lg:table-cell">{student.stress_index}</TableCell>
-                <TableCell className={(student.score || 0) < 50 ? 'text-danger font-semibold' : ''}>
-                  {(student.score || 0).toFixed(1)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getRiskBadgeVariant(student.risk_level)}>
-                    {student.risk_level?.replace(' Risk', '')}
-                  </Badge>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <Badge variant={student.prediction === 'On Track' ? 'default' : 'secondary'}>
-                    {student.prediction}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => navigate(`/admin/student/${student.student_id}`)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    {student.risk_level === 'High Risk' && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-primary"
-                        onClick={() => sendMotivation(student.name)}
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredStudents.map((student) => {
+              const canView = isAdmin || canonicalDept(student.department) === facultyDept;
+              return (
+                <TableRow 
+                  key={student.student_id}
+                  className={(student.score || 0) < 50 ? 'bg-danger/5' : ''}
+                >
+                  <TableCell className="font-mono text-sm">{student.student_id}</TableCell>
+                  <TableCell className="font-medium">{student.name}</TableCell>
+                  <TableCell className="hidden md:table-cell">{deptLabel(student.department)}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{student.semester}</TableCell>
+                  <TableCell>{student.attendance}%</TableCell>
+                  <TableCell className="hidden sm:table-cell">{student.avg_quiz}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{student.avg_assignment}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{student.stress_index}</TableCell>
+                  <TableCell className={(student.score || 0) < 50 ? 'text-danger font-semibold' : ''}>
+                    {(student.score || 0).toFixed(1)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getRiskBadgeVariant(student.risk_level)}>
+                      {student.risk_level?.replace(' Risk', '')}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <Badge variant={student.prediction === 'On Track' ? 'default' : 'secondary'}>
+                      {student.prediction}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {canView && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => navigate(`/admin/student/${student.student_id}`)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canView && student.risk_level === 'High Risk' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-primary"
+                          onClick={() => sendMotivation(student.name)}
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

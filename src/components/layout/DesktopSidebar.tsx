@@ -10,7 +10,8 @@ import {
   CalendarCheck,
   FileText,
   ClipboardCheck,
-  Brain
+  Brain,
+  MessageSquare
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStudent } from '@/context/StudentContext';
@@ -18,6 +19,7 @@ import { useStudent } from '@/context/StudentContext';
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/overall-performance', icon: BarChart3, label: 'Analytics' },
+  { to: '/messages', icon: MessageSquare, label: 'Messages' },
 ];
 
 const insightItems = [

@@ -4,17 +4,40 @@ import { Settings as SettingsIcon, RefreshCw, LogOut, Clock, User, Loader2 } fro
 import { useStudent } from '@/context/StudentContext';
 import { Button } from '@/components/ui/button';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
+import { signOut } from '@/lib/auth';
 
 const Settings: React.FC = () => {
   const { student, isLoading, refreshData, logout } = useStudent();
+  const isFaculty = student?.role === 'faculty' || student?.role === 'admin';
   const navigate = useNavigate();
 
+  console.log('[DEBUG SETTINGS] Full student object:', student);
+  console.log('[DEBUG SETTINGS] student.department value:', student?.department);
+  console.log('[DEBUG SETTINGS] isFaculty:', isFaculty);
+  console.log('[DEBUG SETTINGS] isLoading:', isLoading);
+
+  const deptLabel = (code: string): string => {
+    const map: Record<string, string> = {
+      'IT': 'Information Technology',
+      'CSE': 'Computer Science',
+      'Biotech': 'Biotechnology',
+      'ECE': 'Electronics',
+      'ME': 'Mechanical',
+      'EE': 'Electrical',
+    };
+    return map[code] || code;
+  };
+
   const handleLogout = () => {
+    signOut();
+    localStorage.removeItem('currentUser');
     logout();
     navigate('/');
   };
 
-  if (!student) {
+  // Show loading skeleton while context is still loading OR if student is not yet loaded
+  if (isLoading || !student) {
+    console.log('[DEBUG SETTINGS] Showing LoadingSkeleton - isLoading:', isLoading, 'student:', student);
     return (
       <div className="space-y-6">
         <LoadingSkeleton variant="card" />
@@ -37,8 +60,8 @@ const Settings: React.FC = () => {
           <SettingsIcon className="w-7 h-7 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground">Manage your preferences</p>
+          <h1 className="text-2xl font-bold text-foreground">{isFaculty ? 'Admin Settings' : 'Settings'}</h1>
+          <p className="text-muted-foreground">{isFaculty ? 'Manage your administrator account' : 'Manage your preferences'}</p>
         </div>
       </div>
 
@@ -46,11 +69,11 @@ const Settings: React.FC = () => {
       <div className="bg-card rounded-2xl p-6 card-shadow">
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <User className="w-5 h-5" />
-          Profile Information
+          Account Information
         </h2>
         <div className="space-y-3">
           <div className="flex justify-between py-2 border-b border-border">
-            <span className="text-muted-foreground">Student ID</span>
+            <span className="text-muted-foreground">{isFaculty ? 'User ID' : 'Student ID'}</span>
             <span className="font-medium text-foreground">{student.student_id}</span>
           </div>
           <div className="flex justify-between py-2 border-b border-border">
@@ -58,13 +81,23 @@ const Settings: React.FC = () => {
             <span className="font-medium text-foreground">{student.name}</span>
           </div>
           <div className="flex justify-between py-2 border-b border-border">
+            <span className="text-muted-foreground">Email</span>
+            <span className="font-medium text-foreground">{student.email}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-border">
+            <span className="text-muted-foreground">Role</span>
+            <span className="font-medium text-foreground capitalize">{student.role}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-border">
             <span className="text-muted-foreground">Department</span>
-            <span className="font-medium text-foreground">{student.department}</span>
+            <span className="font-medium text-foreground">{student.department ? deptLabel(student.department) : 'Not set'}</span>
           </div>
-          <div className="flex justify-between py-2">
-            <span className="text-muted-foreground">Semester</span>
-            <span className="font-medium text-foreground">{student.semester}</span>
-          </div>
+          {!isFaculty && (
+            <div className="flex justify-between py-2">
+              <span className="text-muted-foreground">Semester</span>
+              <span className="font-medium text-foreground">{student.semester}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -72,7 +105,7 @@ const Settings: React.FC = () => {
       <div className="bg-card rounded-2xl p-6 card-shadow">
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5" />
-          Data Synchronization
+          Data Management
         </h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl">
@@ -94,7 +127,7 @@ const Settings: React.FC = () => {
             ) : (
               <>
                 <RefreshCw className="w-5 h-5 mr-2" />
-                Refresh Data
+                Refresh Profile Data
               </>
             )}
           </Button>

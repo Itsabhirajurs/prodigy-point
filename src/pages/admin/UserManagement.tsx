@@ -86,16 +86,32 @@ const UserManagement: React.FC = () => {
     semester: '',
   });
 
+  // Canonical department codes and display names
   const departments = [
-    'Computer Science',
-    'Electronics',
-    'Mechanical',
-    'Civil',
-    'Electrical',
-    'Information Technology',
-    'Chemical',
-    'Biotechnology',
+    { code: 'CSE', name: 'Computer Science' },
+    { code: 'IT', name: 'Information Technology' },
+    { code: 'Biotech', name: 'Biotechnology' },
+    { code: 'ECE', name: 'Electronics' },
+    { code: 'ME', name: 'Mechanical' },
+    { code: 'EE', name: 'Electrical' },
   ];
+
+  const canonicalDept = (value: string): string => {
+    const v = (value || '').trim().toLowerCase();
+    if (!v) return '';
+    if (['it', 'information technology'].includes(v)) return 'IT';
+    if (['cse', 'cs', 'computer science', 'computer science and engineering'].includes(v)) return 'CSE';
+    if (['biotech', 'biotechnology'].includes(v)) return 'Biotech';
+    if (['ece', 'ec', 'electronics', 'electronics and communication', 'electronics and communication engineering'].includes(v)) return 'ECE';
+    if (['me', 'mechanical', 'mechanical engineering'].includes(v)) return 'ME';
+    if (['ee', 'eee', 'electrical', 'electrical engineering'].includes(v)) return 'EE';
+    return v.toUpperCase();
+  };
+
+  const deptLabel = (code: string): string => {
+    const dept = departments.find(d => d.code === code);
+    return dept ? dept.name : code;
+  };
 
   useEffect(() => {
     fetchData();
@@ -128,10 +144,25 @@ const UserManagement: React.FC = () => {
       return;
     }
 
+    // Validate faculty_id format: must be FAC followed by at least 3 digits
+    const facultyIdPattern = /^FAC[0-9]{3,}$/;
+    if (!facultyIdPattern.test(facultyForm.faculty_id)) {
+      setError('Faculty ID must be in format FAC### (e.g., FAC001, FAC002)');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
+      // Preserve current admin session so signUp doesn't log us out
+      const { data: sessionData } = await supabase.auth.getSession();
+      const adminSession = sessionData.session;
+
+      if (!adminSession) {
+        throw new Error('Missing admin session. Please re-login.');
+      }
+
       // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: facultyForm.email,
@@ -141,29 +172,46 @@ const UserManagement: React.FC = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create user');
 
-      // 2. Create profile
-      const { error: profileError } = await supabase.from('profiles').insert([
-        {
-          id: authData.user.id,
-          email: facultyForm.email,
-          full_name: facultyForm.full_name,
-          role: 'faculty',
-        },
-      ]);
+      // Restore admin session to keep permissions for inserts
+      const { error: restoreError } = await supabase.auth.setSession({
+        access_token: adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
 
-      if (profileError) throw profileError;
+      if (restoreError) {
+        throw new Error(`Failed to restore admin session: ${restoreError.message}`);
+      }
+
+      // 2. Create profile using trusted admin function (SECURITY DEFINER bypasses RLS)
+      const canonicalDeptCode = canonicalDept(facultyForm.department);
+      const { data: profileData, error: profileError } = await supabase
+        .rpc('admin_create_profile', {
+          p_user_id: authData.user.id,
+          p_email: facultyForm.email,
+          p_full_name: facultyForm.full_name,
+          p_role: 'faculty',
+          p_department: canonicalDeptCode,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error(`Profile creation failed: ${profileError.message || profileError.code}`);
+      }
+      if (profileData?.status !== 'success') {
+        throw new Error(`Profile creation failed: ${profileData?.message || 'Unknown error'}`);
+      }
 
       // 3. Create faculty record
-      const { error: facultyError } = await supabase.from('faculty').insert([
-        {
+      const { error: facultyError } = await supabase
+        .from('faculty')
+        .insert({
           user_id: authData.user.id,
           faculty_id: facultyForm.faculty_id,
           full_name: facultyForm.full_name,
           email: facultyForm.email,
-          department: facultyForm.department,
+          department: canonicalDeptCode,
           specialization: facultyForm.specialization || null,
-        },
-      ]);
+        });
 
       if (facultyError) throw facultyError;
 
@@ -193,10 +241,25 @@ const UserManagement: React.FC = () => {
       return;
     }
 
+    // Validate student_id format: must be STU followed by at least 3 digits
+    const studentIdPattern = /^STU[0-9]{3,}$/;
+    if (!studentIdPattern.test(studentForm.student_id)) {
+      setError('Student ID must be in format STU### (e.g., STU001, STU002)');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
+      // Preserve current admin session so signUp doesn't log us out
+      const { data: sessionData } = await supabase.auth.getSession();
+      const adminSession = sessionData.session;
+
+      if (!adminSession) {
+        throw new Error('Missing admin session. Please re-login.');
+      }
+
       // 1. Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: studentForm.email,
@@ -206,29 +269,46 @@ const UserManagement: React.FC = () => {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create user');
 
-      // 2. Create profile
-      const { error: profileError } = await supabase.from('profiles').insert([
-        {
-          id: authData.user.id,
-          email: studentForm.email,
-          full_name: studentForm.full_name,
-          role: 'student',
-        },
-      ]);
+      // Restore admin session to keep permissions for inserts
+      const { error: restoreError } = await supabase.auth.setSession({
+        access_token: adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
 
-      if (profileError) throw profileError;
+      if (restoreError) {
+        throw new Error(`Failed to restore admin session: ${restoreError.message}`);
+      }
+
+      // 2. Create profile using trusted admin function (SECURITY DEFINER bypasses RLS)
+      const canonicalDeptCode = canonicalDept(studentForm.department);
+      const { data: profileData, error: profileError } = await supabase
+        .rpc('admin_create_profile', {
+          p_user_id: authData.user.id,
+          p_email: studentForm.email,
+          p_full_name: studentForm.full_name,
+          p_role: 'student',
+          p_department: canonicalDeptCode,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error(`Profile creation failed: ${profileError.message || profileError.code}`);
+      }
+      if (profileData?.status !== 'success') {
+        throw new Error(`Profile creation failed: ${profileData?.message || 'Unknown error'}`);
+      }
 
       // 3. Create student record
-      const { error: studentError } = await supabase.from('students').insert([
-        {
+      const { error: studentError } = await supabase
+        .from('students')
+        .insert({
           user_id: authData.user.id,
           student_id: studentForm.student_id,
           full_name: studentForm.full_name,
           email: studentForm.email,
-          department: studentForm.department,
+          department: canonicalDeptCode,
           semester: parseInt(studentForm.semester),
-        },
-      ]);
+        });
 
       if (studentError) throw studentError;
 
@@ -361,8 +441,9 @@ const UserManagement: React.FC = () => {
                       id="fac_id"
                       placeholder="FAC001"
                       value={facultyForm.faculty_id}
-                      onChange={(e) => setFacultyForm({ ...facultyForm, faculty_id: e.target.value })}
+                      onChange={(e) => setFacultyForm({ ...facultyForm, faculty_id: e.target.value.toUpperCase() })}
                     />
+                    <p className="text-xs text-muted-foreground">Format: FAC### (e.g., FAC001, FAC002)</p>
                   </div>
 
                   <div className="space-y-2">
@@ -376,8 +457,8 @@ const UserManagement: React.FC = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((dept) => (
-                          <SelectItem key={dept} value={dept}>
-                            {dept}
+                          <SelectItem key={dept.code} value={dept.code}>
+                            {dept.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -436,7 +517,7 @@ const UserManagement: React.FC = () => {
                           <TableCell className="font-mono">{fac.faculty_id}</TableCell>
                           <TableCell className="font-medium">{fac.full_name}</TableCell>
                           <TableCell className="font-mono text-sm">{fac.email}</TableCell>
-                          <TableCell>{fac.department}</TableCell>
+                          <TableCell>{deptLabel(fac.department)}</TableCell>
                           <TableCell>{fac.specialization || '-'}</TableCell>
                           <TableCell className="text-sm">
                             {new Date(fac.created_at).toLocaleDateString()}
@@ -527,8 +608,9 @@ const UserManagement: React.FC = () => {
                       id="stu_id"
                       placeholder="STU001"
                       value={studentForm.student_id}
-                      onChange={(e) => setStudentForm({ ...studentForm, student_id: e.target.value })}
+                      onChange={(e) => setStudentForm({ ...studentForm, student_id: e.target.value.toUpperCase() })}
                     />
+                    <p className="text-xs text-muted-foreground">Format: STU### (e.g., STU001, STU002)</p>
                   </div>
 
                   <div className="space-y-2">
@@ -542,8 +624,8 @@ const UserManagement: React.FC = () => {
                       </SelectTrigger>
                       <SelectContent>
                         {departments.map((dept) => (
-                          <SelectItem key={dept} value={dept}>
-                            {dept}
+                          <SelectItem key={dept.code} value={dept.code}>
+                            {dept.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -611,7 +693,7 @@ const UserManagement: React.FC = () => {
                           <TableCell className="font-mono">{student.student_id}</TableCell>
                           <TableCell className="font-medium">{student.full_name}</TableCell>
                           <TableCell className="font-mono text-sm">{student.email}</TableCell>
-                          <TableCell>{student.department}</TableCell>
+                          <TableCell>{deptLabel(student.department)}</TableCell>
                           <TableCell>Sem {student.semester}</TableCell>
                           <TableCell className="text-sm">
                             {new Date(student.created_at).toLocaleDateString()}

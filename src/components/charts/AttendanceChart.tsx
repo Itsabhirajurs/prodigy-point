@@ -1,26 +1,57 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const generateMockData = () => {
+type AttendancePoint = { week: string; attendance: number; subject?: string };
+
+const generateMockData = (): AttendancePoint[] => {
   const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'];
   return weeks.map((week, index) => ({
     week,
     attendance: Math.max(60, Math.min(100, 85 + Math.random() * 20 - 10 - (index === 2 ? 15 : 0))),
+    subject: 'GEN',
   }));
 };
 
-export const AttendanceChart: React.FC<{ currentValue?: number }> = ({ currentValue }) => {
-  const data = generateMockData();
-  if (currentValue) {
-    data[data.length - 1].attendance = currentValue;
+export const AttendanceChart: React.FC<{ currentValue?: number; data?: AttendancePoint[] }> = ({ currentValue, data }) => {
+  // Group by week to handle multiple subjects per week and avoid duplicates
+  const processedData = React.useMemo(() => {
+    if (data === undefined) {
+      return generateMockData();
+    }
+    
+    // Group by week and average attendance
+    const weekMap = new Map<string, { week: string; attendance: number; count: number }>();
+    data.forEach((point) => {
+      const existing = weekMap.get(point.week);
+      if (existing) {
+        existing.attendance += point.attendance;
+        existing.count += 1;
+      } else {
+        weekMap.set(point.week, { week: point.week, attendance: point.attendance, count: 1 });
+      }
+    });
+    
+    return Array.from(weekMap.values()).map((item) => ({
+      week: item.week,
+      attendance: item.attendance / item.count,
+      subject: undefined,
+    }));
+  }, [data]);
+  
+  const chartData = processedData;
+  if (currentValue && data && data.length > 0) {
+    chartData[chartData.length - 1].attendance = currentValue;
   }
 
   return (
     <div className="bg-card rounded-2xl p-5 card-shadow">
       <h3 className="text-lg font-semibold text-foreground mb-4">Weekly Attendance Trend</h3>
       <div className="h-64">
+        {chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">No attendance data available</div>
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey="week" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis domain={[50, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
@@ -30,6 +61,7 @@ export const AttendanceChart: React.FC<{ currentValue?: number }> = ({ currentVa
                 border: '1px solid hsl(var(--border))',
                 borderRadius: '8px',
               }}
+              formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Attendance']}
             />
             <Line
               type="monotone"
@@ -41,6 +73,7 @@ export const AttendanceChart: React.FC<{ currentValue?: number }> = ({ currentVa
             />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

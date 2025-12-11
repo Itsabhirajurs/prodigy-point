@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   BarChart3, 
-  Lightbulb, 
+  MessageSquare, 
   Target, 
   Settings 
 } from 'lucide-react';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
   { to: '/overall-performance', icon: BarChart3, label: 'Analytics' },
-  { to: '/insights/attendance', icon: Lightbulb, label: 'Insights' },
+  { to: '/messages', icon: MessageSquare, label: 'Messages' },
   { to: '/recommendations', icon: Target, label: 'Tips' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];

@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   role: AppRole;
   full_name: string;
+  department?: string;
 }
 
 export interface SignInResult {
@@ -48,6 +49,7 @@ export const signInWithEmail = async (
         email: profile.email,
         role: profile.role as AppRole,
         full_name: profile.full_name,
+        department: profile.department,
       },
     };
   } catch (error: any) {

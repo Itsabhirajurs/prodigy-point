@@ -7,15 +7,29 @@ interface RiskDistributionChartProps {
   highRisk: number;
 }
 
+const LegendContent = ({ payload = [] }: { payload?: any[] }) => (
+  <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+    {payload.map((entry) => (
+      <div key={entry.value} className="flex items-center gap-2">
+        <span
+          className="h-3 w-3 rounded-full"
+          style={{ backgroundColor: entry.color || entry.payload?.color }}
+        />
+        <span className="text-foreground">{entry.value}</span>
+      </div>
+    ))}
+  </div>
+);
+
 export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
   lowRisk,
   mediumRisk,
   highRisk,
 }) => {
   const data = [
-    { name: 'Low Risk', value: lowRisk, color: 'hsl(var(--success))' },
-    { name: 'Medium Risk', value: mediumRisk, color: 'hsl(var(--warning))' },
-    { name: 'High Risk', value: highRisk, color: 'hsl(var(--danger))' },
+    { name: 'Low Risk', value: lowRisk, color: '#22c55e' }, // Green
+    { name: 'Medium Risk', value: mediumRisk, color: '#eab308' }, // Yellow
+    { name: 'High Risk', value: highRisk, color: '#ef4444' }, // Red
   ].filter(d => d.value > 0);
 
   if (data.length === 0) {
@@ -37,7 +51,7 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
           outerRadius={90}
           paddingAngle={5}
           dataKey="value"
-          label={({ name, value }) => `${name}: ${value}`}
+          label={false}
           labelLine={false}
         >
           {data.map((entry, index) => (
@@ -51,7 +65,7 @@ export const RiskDistributionChart: React.FC<RiskDistributionChartProps> = ({
             borderRadius: '8px',
           }}
         />
-        <Legend />
+        <Legend content={<LegendContent />} />
       </PieChart>
     </ResponsiveContainer>
   );

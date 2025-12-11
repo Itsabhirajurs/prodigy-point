@@ -36,7 +36,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       <div className="space-y-1">
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <p className="text-3xl font-bold text-foreground">
-          {value}
+          {typeof value === 'number' ? Math.round(value * 10) / 10 : value}
           {suffix && <span className="text-lg font-medium text-muted-foreground ml-1">{suffix}</span>}
         </p>
         {description && (
