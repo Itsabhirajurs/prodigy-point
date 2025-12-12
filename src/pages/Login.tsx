@@ -176,8 +176,8 @@ const Login: React.FC = () => {
 
           {!showForgotPassword ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-2 animate-slide-up stagger-1">
+                <Label htmlFor="email" className="font-semibold text-foreground">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
@@ -187,14 +187,14 @@ const Login: React.FC = () => {
                     setEmail(e.target.value);
                     setError('');
                   }}
-                  className="w-full h-12 text-base"
+                  className="w-full h-12 text-base glow-focus hover-brighten"
                   disabled={isLoading}
                   required
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-2 animate-slide-up stagger-2">
+                <Label htmlFor="password" className="font-semibold text-foreground">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -204,7 +204,7 @@ const Login: React.FC = () => {
                     setPassword(e.target.value);
                     setError('');
                   }}
-                  className="w-full h-12 text-base"
+                  className="w-full h-12 text-base glow-focus hover-brighten"
                   disabled={isLoading}
                   required
                 />
@@ -212,27 +212,27 @@ const Login: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-base font-semibold gradient-primary hover:opacity-90 transition-opacity"
+                className="w-full h-12 text-base font-semibold button-bounce animate-slide-up stagger-3"
                 disabled={isLoading || !email.trim() || !password.trim()}
               >
                 {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin-fast" />
                 ) : (
                   <>
                     Sign In
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-5 h-5 ml-2 icon-rotate" />
                   </>
                 )}
               </Button>
 
-              <div className="text-center mt-4">
+              <div className="text-center mt-6 animate-slide-up stagger-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowForgotPassword(true);
                     setError('');
                   }}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-primary hover:text-primary/80 transition-smooth hover:scale-105 font-medium"
                   disabled={isLoading}
                 >
                   Forgot your password?

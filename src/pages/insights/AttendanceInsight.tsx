@@ -129,15 +129,16 @@ const AttendanceInsight: React.FC = () => {
 
       {/* Insights */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground uppercase tracking-wide">Key Insights</h2>
+        <h2 className="text-2xl font-bold text-foreground uppercase tracking-wide animate-slide-up">Key Insights</h2>
         {insights.map((insight, index) => {
           const Icon = insight.icon;
           const bgColor = insight.type === 'success' ? 'from-success/15 to-success/5' : insight.type === 'warning' ? 'from-warning/15 to-warning/5' : 'from-primary/15 to-primary/5';
           const borderColor = insight.type === 'success' ? 'border-success/30' : insight.type === 'warning' ? 'border-warning/30' : 'border-primary/30';
           const iconColor = insight.type === 'success' ? 'text-success' : insight.type === 'warning' ? 'text-warning' : 'text-primary';
+          const staggerClass = `stagger-${(index % 5) + 1}`;
           
           return (
-            <div key={index} className={`bg-gradient-to-r ${bgColor} rounded-xl p-6 card-shadow border-2 ${borderColor} hover:border-opacity-60 transition-all hover:shadow-neon-lg hover:scale-102 group`}>
+            <div key={index} className={`bg-gradient-to-r ${bgColor} rounded-xl p-6 card-shadow border-2 ${borderColor} hover:border-opacity-60 transition-all hover:shadow-neon-lg hover:scale-102 group animate-slide-up ${staggerClass}`}>
               <div className="flex items-start gap-4">
                 <div className={`w-12 h-12 rounded-lg bg-${iconColor}/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
                   <Icon className={`w-6 h-6 ${iconColor}`} />

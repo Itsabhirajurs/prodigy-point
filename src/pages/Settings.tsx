@@ -55,8 +55,8 @@ const Settings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center">
+      <div className="flex items-center gap-4 animate-slide-up">
+        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-neon">
           <SettingsIcon className="w-7 h-7 text-primary-foreground" />
         </div>
         <div>
@@ -66,7 +66,7 @@ const Settings: React.FC = () => {
       </div>
 
       {/* Profile Card */}
-      <div className="bg-card rounded-2xl p-6 card-shadow">
+      <div className="bg-card rounded-2xl p-6 card-shadow animate-slide-up stagger-1 transition-all duration-300 hover:shadow-neon-lg hover:scale-102">
         <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
           <User className="w-5 h-5" />
           Account Information
@@ -107,8 +107,8 @@ const Settings: React.FC = () => {
           <Clock className="w-5 h-5" />
           Data Management
         </h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl">
+        <div className="space-y-4 animate-slide-up stagger-2">
+          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl transition-all duration-300 hover:bg-secondary/70 hover:shadow-md">
             <div>
               <p className="font-medium text-foreground">Last Updated</p>
               <p className="text-sm text-muted-foreground">
@@ -119,14 +119,14 @@ const Settings: React.FC = () => {
           <Button
             onClick={refreshData}
             disabled={isLoading}
-            className="w-full h-12 text-base font-semibold"
+            className="w-full h-12 text-base font-semibold button-bounce transition-all duration-300"
             variant="outline"
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin-fast" />
             ) : (
               <>
-                <RefreshCw className="w-5 h-5 mr-2" />
+                <RefreshCw className="w-5 h-5 mr-2 icon-rotate" />
                 Refresh Profile Data
               </>
             )}
@@ -135,14 +135,14 @@ const Settings: React.FC = () => {
       </div>
 
       {/* Current Score Card */}
-      <div className="bg-card rounded-2xl p-6 card-shadow">
+      <div className="bg-card rounded-2xl p-6 card-shadow animate-slide-up stagger-2 transition-all duration-300 hover:shadow-neon-lg hover:scale-102">
         <h2 className="text-lg font-semibold text-foreground mb-4">Current Metrics</h2>
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-secondary/50 rounded-xl">
+          <div className="text-center p-4 bg-secondary/50 rounded-xl transition-all duration-300 hover:bg-primary/20 hover:shadow-neon cursor-pointer animate-slide-up stagger-1">
             <p className="text-2xl font-bold text-foreground">{student.score.toFixed(1)}</p>
             <p className="text-xs text-muted-foreground">Overall Score</p>
           </div>
-          <div className="text-center p-4 bg-secondary/50 rounded-xl">
+          <div className="text-center p-4 bg-secondary/50 rounded-xl transition-all duration-300 hover:bg-primary/20 hover:shadow-neon cursor-pointer animate-slide-up stagger-2">
             <p className={`text-lg font-bold ${
               student.risk_level === 'Low Risk' ? 'text-success' :
               student.risk_level === 'Medium Risk' ? 'text-warning' : 'text-destructive'
@@ -158,9 +158,9 @@ const Settings: React.FC = () => {
       <Button
         onClick={handleLogout}
         variant="destructive"
-        className="w-full h-12 text-base font-semibold"
+        className="w-full h-12 text-base font-semibold button-bounce transition-all duration-300 animate-slide-up stagger-3"
       >
-        <LogOut className="w-5 h-5 mr-2" />
+        <LogOut className="w-5 h-5 mr-2 icon-rotate" />
         Logout
       </Button>
     </div>

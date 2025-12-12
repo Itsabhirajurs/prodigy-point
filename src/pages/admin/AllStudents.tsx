@@ -345,12 +345,13 @@ const AllStudents: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredStudents.map((student) => {
+            {filteredStudents.map((student, index) => {
               const canView = isAdmin || canonicalDept(student.department) === facultyDept;
+              const staggerDelay = `${(index % 5) + 1}`;
               return (
                 <TableRow 
                   key={student.student_id}
-                  className={(student.score || 0) < 50 ? 'bg-danger/5' : ''}
+                  className={`animate-slide-up stagger-${staggerDelay} transition-all duration-300 hover:bg-primary/5 ${(student.score || 0) < 50 ? 'bg-danger/5' : ''}`}
                 >
                   <TableCell className="font-mono text-sm">{student.student_id}</TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>

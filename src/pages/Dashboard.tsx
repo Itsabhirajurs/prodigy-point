@@ -110,34 +110,42 @@ const Dashboard: React.FC = () => {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Attendance"
-          value={metrics.attendance}
-          suffix="%"
-          icon={CalendarCheck}
-          variant={getAttendanceVariant()}
-        />
-        <MetricCard
-          title="Avg Assignment"
-          value={metrics.assignment}
-          suffix="%"
-          icon={FileText}
-          variant="default"
-        />
-        <MetricCard
-          title="Avg Quiz"
-          value={metrics.quiz}
-          suffix="%"
-          icon={ClipboardCheck}
-          variant="default"
-        />
-        <MetricCard
-          title="Stress Index"
-          value={metrics.stress}
-          suffix="%"
-          icon={Brain}
-          variant={getStressVariant()}
-        />
+        <div className="animate-slide-up stagger-1">
+          <MetricCard
+            title="Attendance"
+            value={metrics.attendance}
+            suffix="%"
+            icon={CalendarCheck}
+            variant={getAttendanceVariant()}
+          />
+        </div>
+        <div className="animate-slide-up stagger-2">
+          <MetricCard
+            title="Avg Assignment"
+            value={metrics.assignment}
+            suffix="%"
+            icon={FileText}
+            variant="default"
+          />
+        </div>
+        <div className="animate-slide-up stagger-3">
+          <MetricCard
+            title="Avg Quiz"
+            value={metrics.quiz}
+            suffix="%"
+            icon={ClipboardCheck}
+            variant="default"
+          />
+        </div>
+        <div className="animate-slide-up stagger-4">
+          <MetricCard
+            title="Stress Index"
+            value={metrics.stress}
+            suffix="%"
+            icon={Brain}
+            variant={getStressVariant()}
+          />
+        </div>
       </div>
 
       {/* Risk Analysis Card */}

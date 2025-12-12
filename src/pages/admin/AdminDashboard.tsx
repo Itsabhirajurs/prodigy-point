@@ -369,63 +369,67 @@ const AdminDashboard: React.FC = () => {
 
         {/* Simple visuals */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-br from-card/95 via-primary/5 to-card border-2 border-primary/30 hover:border-primary/50 transition-all hover:shadow-neon-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl uppercase tracking-wide">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <BarChart3 className="w-6 h-6 text-primary" />
+          <div className="animate-slide-up stagger-1">
+            <Card className="bg-gradient-to-br from-card/95 via-primary/5 to-card border-2 border-primary/30 hover:border-primary/50 transition-all hover:shadow-neon-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl uppercase tracking-wide">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <BarChart3 className="w-6 h-6 text-primary" />
+                  </div>
+                  Headcount Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="w-28 text-sm text-muted-foreground font-semibold uppercase">Faculty</span>
+                  <div className="flex-1 h-4 rounded-full bg-secondary/50 border border-primary/20 overflow-hidden">
+                    <div
+                      className="h-4 rounded-full bg-gradient-to-r from-primary to-primary/50"
+                      style={{ width: `${Math.min(100, facultyCount || 0) + 10}%` }}
+                    />
+                  </div>
+                  <span className="w-12 text-right text-sm font-bold text-foreground">{facultyCount}</span>
                 </div>
-                Headcount Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <span className="w-28 text-sm text-muted-foreground font-semibold uppercase">Faculty</span>
-                <div className="flex-1 h-4 rounded-full bg-secondary/50 border border-primary/20 overflow-hidden">
-                  <div
-                    className="h-4 rounded-full bg-gradient-to-r from-primary to-primary/50"
-                    style={{ width: `${Math.min(100, facultyCount || 0) + 10}%` }}
-                  />
+                <div className="flex items-center gap-3">
+                  <span className="w-28 text-sm text-muted-foreground font-semibold uppercase">Students</span>
+                  <div className="flex-1 h-4 rounded-full bg-secondary/50 border border-accent/20 overflow-hidden">
+                    <div
+                      className="h-4 rounded-full bg-gradient-to-r from-accent to-accent/50"
+                      style={{ width: `${Math.min(100, totalStudents || 0) + 10}%` }}
+                    />
+                  </div>
+                  <span className="w-12 text-right text-sm font-bold text-foreground">{totalStudents}</span>
                 </div>
-                <span className="w-12 text-right text-sm font-bold text-foreground">{facultyCount}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="w-28 text-sm text-muted-foreground font-semibold uppercase">Students</span>
-                <div className="flex-1 h-4 rounded-full bg-secondary/50 border border-accent/20 overflow-hidden">
-                  <div
-                    className="h-4 rounded-full bg-gradient-to-r from-accent to-accent/50"
-                    style={{ width: `${Math.min(100, totalStudents || 0) + 10}%` }}
-                  />
-                </div>
-                <span className="w-12 text-right text-sm font-bold text-foreground">{totalStudents}</span>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <Card className="bg-gradient-to-br from-card/95 via-warning/5 to-card border-2 border-warning/30 hover:border-warning/50 transition-all hover:shadow-neon-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl uppercase tracking-wide">
-                <div className="p-2 rounded-lg bg-warning/10">
-                  <PieChart className="w-6 h-6 text-warning" />
+          <div className="animate-slide-up stagger-2">
+            <Card className="bg-gradient-to-br from-card/95 via-warning/5 to-card border-2 border-warning/30 hover:border-warning/50 transition-all hover:shadow-neon-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl uppercase tracking-wide">
+                  <div className="p-2 rounded-lg bg-warning/10">
+                    <PieChart className="w-6 h-6 text-warning" />
+                  </div>
+                  Risk Snapshot
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/20 hover:border-success/40 transition-all animate-slide-up stagger-1">
+                  <p className="text-sm font-semibold text-foreground">Low Risk</p>
+                  <p className="text-lg font-bold text-success">{lowRisk}</p>
                 </div>
-                Risk Snapshot
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/20 hover:border-success/40 transition-all">
-                <p className="text-sm font-semibold text-foreground">Low Risk</p>
-                <p className="text-lg font-bold text-success">{lowRisk}</p>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border border-warning/20 hover:border-warning/40 transition-all">
-                <p className="text-sm font-semibold text-foreground">Medium Risk</p>
-                <p className="text-lg font-bold text-warning">{mediumRisk}</p>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20 hover:border-destructive/40 transition-all">
-                <p className="text-sm font-semibold text-foreground">High Risk</p>
-                <p className="text-lg font-bold text-destructive">{highRisk}</p>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border border-warning/20 hover:border-warning/40 transition-all animate-slide-up stagger-2">
+                  <p className="text-sm font-semibold text-foreground">Medium Risk</p>
+                  <p className="text-lg font-bold text-warning">{mediumRisk}</p>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-destructive/10 rounded-lg border border-destructive/20 hover:border-destructive/40 transition-all animate-slide-up stagger-3">
+                  <p className="text-sm font-semibold text-foreground">High Risk</p>
+                  <p className="text-lg font-bold text-destructive">{highRisk}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
