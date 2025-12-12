@@ -43,7 +43,10 @@ export const StressChart: React.FC<{ currentValue?: number; data?: StressPoint[]
                 border: '2px solid hsl(var(--destructive))',
                 borderRadius: '12px',
                 boxShadow: '0 0 20px rgba(var(--destructive), 0.3)',
+                color: 'hsl(var(--foreground))',
               }}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value, _name, props) => {
                 const social = props.payload?.social ? `Social: ${props.payload.social}h/day` : '';
                 const travel = props.payload?.travel ? `Travel: ${props.payload.travel} min/day` : '';

@@ -41,7 +41,10 @@ export const QuizChart: React.FC<{ currentValue?: number; data?: QuizPoint[] }> 
                 border: '2px solid hsl(var(--success))',
                 borderRadius: '12px',
                 boxShadow: '0 0 20px rgba(var(--success), 0.3)',
+                color: 'hsl(var(--foreground))',
               }}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Score']}
             />
             <Bar dataKey="score" fill="hsl(var(--warning))" radius={[8, 8, 0, 0]} isAnimationActive={true} />

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface FacultyRow {
@@ -95,46 +95,64 @@ const AllFaculty: React.FC = () => {
           <CardTitle>Faculty Directory</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Specialization</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed border-border bg-gradient-to-br from-card/50 via-card to-primary/5 p-12 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 rounded-2xl bg-primary/10 border-2 border-primary/20">
+                  <Users className="w-12 h-12 text-primary/60" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Faculty Found</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                {search
+                  ? 'No faculty members match your search. Try a different name or ID.'
+                  : 'No faculty members have been added yet. Start by adding faculty to the system.'}
+              </p>
+              {search && (
+                <Button
+                  variant="outline"
+                  onClick={() => setSearch('')}
+                  className="gap-2"
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      <Loader2 className="w-6 h-6 animate-spin mx-auto" />
-                    </TableCell>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Specialization</TableHead>
+                    <TableHead>Joined</TableHead>
                   </TableRow>
-                ) : filtered.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                      No faculty found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filtered.map((f) => (
-                    <TableRow key={f.id}>
-                      <TableCell className="font-mono">{f.faculty_id}</TableCell>
-                      <TableCell className="font-medium">{f.full_name}</TableCell>
-                      <TableCell className="font-mono text-sm">{f.email}</TableCell>
-                      <TableCell>{deptLabel(f.department)}</TableCell>
-                      <TableCell>{f.specialization || '—'}</TableCell>
-                      <TableCell className="text-sm">{new Date(f.created_at).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((f, index) => {
+                    const staggerDelay = `${(index % 5) + 1}`;
+                    return (
+                      <TableRow key={f.id} className={`animate-slide-up stagger-${staggerDelay}`}>
+                        <TableCell className="font-mono">{f.faculty_id}</TableCell>
+                        <TableCell className="font-medium">{f.full_name}</TableCell>
+                        <TableCell className="font-mono text-sm">{f.email}</TableCell>
+                        <TableCell>{deptLabel(f.department)}</TableCell>
+                        <TableCell>{f.specialization || '—'}</TableCell>
+                        <TableCell className="text-sm">{new Date(f.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

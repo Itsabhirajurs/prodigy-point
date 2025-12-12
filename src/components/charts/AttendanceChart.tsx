@@ -64,8 +64,11 @@ export const AttendanceChart: React.FC<{ currentValue?: number; data?: Attendanc
                 border: '2px solid hsl(var(--accent))',
                 borderRadius: '12px',
                 boxShadow: '0 0 20px rgba(var(--accent), 0.3)',
+                color: 'hsl(var(--foreground))',
               }}
-              formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Attendance']}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
+              formatter={(value: number, _name, props) => [`${value.toFixed ? value.toFixed(1) : Number(value).toFixed(1)}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Attendance']}
             />
             <Line
               type="monotone"

@@ -196,7 +196,10 @@ const StudentDetail: React.FC = () => {
       if (fetched) {
         setStudentData(fetched);
         const subjectKey = fetched.id || student_id;
-        if (subjectAverages.length === 0) {
+
+        if (fetched.subject_averages && fetched.subject_averages.length > 0) {
+          setSubjectAverages(fetched.subject_averages);
+        } else if (subjectAverages.length === 0) {
           const subs = await fetchSubjectAverages(subjectKey);
           setSubjectAverages(subs);
         }
@@ -273,7 +276,7 @@ const StudentDetail: React.FC = () => {
       </div>
 
       {/* Subject selector */}
-      {subjectAverages.length > 0 && (
+      {studentData && (
         <Card className="border-primary/20">
           <CardContent className="pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
@@ -386,11 +389,18 @@ const StudentDetail: React.FC = () => {
             </Button>
           </div>
 
+          {notes.length === 0 && (
+            <div className="rounded-lg border-2 border-dashed border-border bg-secondary/20 p-6 text-center mt-4">
+              <p className="text-sm text-muted-foreground font-medium">No notes yet for this student</p>
+              <p className="text-xs text-muted-foreground mt-1">Add notes to track student progress</p>
+            </div>
+          )}
+
           {notes.length > 0 && (
             <div className="space-y-3 pt-4 border-t">
               <h4 className="font-medium text-foreground">Previous Notes</h4>
               {notes.map((note) => (
-                <div key={note.id} className="p-3 rounded-lg bg-secondary/50">
+                <div key={note.id} className="p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
                   <p className="text-sm text-foreground">{note.note}</p>
                   <div className="flex gap-2 mt-2 text-xs text-muted-foreground">
                     <span>By: {note.faculty_id}</span>
@@ -400,12 +410,6 @@ const StudentDetail: React.FC = () => {
                 </div>
               ))}
             </div>
-          )}
-
-          {notes.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No notes yet for this student
-            </p>
           )}
         </CardContent>
       </Card>

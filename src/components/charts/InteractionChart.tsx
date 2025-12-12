@@ -57,7 +57,10 @@ export const InteractionChart: React.FC<{ interaction?: number; travelTime?: num
                 border: '2px solid hsl(var(--primary))',
                 borderRadius: '12px',
                 boxShadow: '0 0 20px rgba(var(--primary), 0.3)',
+                color: 'hsl(var(--foreground))',
               }}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number, name: string) => [
                 name === 'travel' ? `${value} min` : `${value}%`,
                 name === 'travel' ? 'Travel Time' : 'Interaction',

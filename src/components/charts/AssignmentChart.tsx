@@ -43,7 +43,10 @@ export const AssignmentChart: React.FC<{ currentValue?: number; data?: Assignmen
                 border: '2px solid hsl(var(--warning))',
                 borderRadius: '12px',
                 boxShadow: '0 0 20px rgba(var(--warning), 0.3)',
+                color: 'hsl(var(--foreground))',
               }}
+              labelStyle={{ color: 'hsl(var(--foreground))' }}
+              itemStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Score']}
             />
             <defs>

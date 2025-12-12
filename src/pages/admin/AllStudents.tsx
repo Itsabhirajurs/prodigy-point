@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, Eye, Send } from 'lucide-react';
+import { Search, Download, Eye, Send, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -317,92 +317,122 @@ const AllStudents: React.FC = () => {
         </Select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border bg-card overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('student_id')}>
-                ID {sortBy === 'student_id' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('name')}>
-                Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="hidden md:table-cell">Department</TableHead>
-              <TableHead className="hidden lg:table-cell">Semester</TableHead>
-              <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('attendance')}>
-                Att% {sortBy === 'attendance' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead className="hidden sm:table-cell">Quiz</TableHead>
-              <TableHead className="hidden sm:table-cell">Assign</TableHead>
-              <TableHead className="hidden lg:table-cell">Stress</TableHead>
-              <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('score')}>
-                Score {sortBy === 'score' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </TableHead>
-              <TableHead>Risk</TableHead>
-              <TableHead className="hidden md:table-cell">Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredStudents.map((student, index) => {
-              const canView = isAdmin || canonicalDept(student.department) === facultyDept;
-              const staggerDelay = `${(index % 5) + 1}`;
-              return (
-                <TableRow 
-                  key={student.student_id}
-                  className={`animate-slide-up stagger-${staggerDelay} transition-all duration-300 hover:bg-primary/5 ${(student.score || 0) < 50 ? 'bg-danger/5' : ''}`}
-                >
-                  <TableCell className="font-mono text-sm">{student.student_id}</TableCell>
-                  <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className="hidden md:table-cell">{deptLabel(student.department)}</TableCell>
-                  <TableCell className="hidden lg:table-cell">{student.semester}</TableCell>
-                  <TableCell>{student.attendance}%</TableCell>
-                  <TableCell className="hidden sm:table-cell">{student.avg_quiz}</TableCell>
-                  <TableCell className="hidden sm:table-cell">{student.avg_assignment}</TableCell>
-                  <TableCell className="hidden lg:table-cell">{student.stress_index}</TableCell>
-                  <TableCell className={(student.score || 0) < 50 ? 'text-danger font-semibold' : ''}>
-                    {(student.score || 0).toFixed(1)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getRiskBadgeVariant(student.risk_level)}>
-                      {student.risk_level?.replace(' Risk', '')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <Badge variant={student.prediction === 'On Track' ? 'default' : 'secondary'}>
-                      {student.prediction}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {canView && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => navigate(`/admin/student/${student.student_id}`)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {canView && student.risk_level === 'High Risk' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-primary"
-                          onClick={() => sendMotivation(student.name)}
-                        >
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Table or Empty State */}
+      {filteredStudents.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-gradient-to-br from-card/50 via-card to-primary/5 p-12 text-center animate-fade-in">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 rounded-2xl bg-primary/10 border-2 border-primary/20">
+              <Users className="w-12 h-12 text-primary/60" />
+            </div>
+          </div>
+          <h3 className="text-xl font-bold text-foreground mb-2">No Students Found</h3>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            {searchQuery || riskFilter !== 'all' || statusFilter !== 'all' || departmentFilter !== 'all'
+              ? 'Try adjusting your filters or search terms to find students.'
+              : 'No students have been registered yet. Start by adding students to the system.'}
+          </p>
+          {(searchQuery || riskFilter !== 'all' || statusFilter !== 'all' || departmentFilter !== 'all') && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery('');
+                setRiskFilter('all');
+                setStatusFilter('all');
+                setDepartmentFilter('all');
+              }}
+              className="gap-2"
+            >
+              Clear Filters
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border bg-card overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('student_id')}>
+                  ID {sortBy === 'student_id' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('name')}>
+                  Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="hidden md:table-cell">Department</TableHead>
+                <TableHead className="hidden lg:table-cell">Semester</TableHead>
+                <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('attendance')}>
+                  Att% {sortBy === 'attendance' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="hidden sm:table-cell">Quiz</TableHead>
+                <TableHead className="hidden sm:table-cell">Assign</TableHead>
+                <TableHead className="hidden lg:table-cell">Stress</TableHead>
+                <TableHead className="cursor-pointer hover:text-foreground" onClick={() => handleSort('score')}>
+                  Score {sortBy === 'score' && (sortOrder === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead>Risk</TableHead>
+                <TableHead className="hidden md:table-cell">Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredStudents.map((student, index) => {
+                const canView = isAdmin || canonicalDept(student.department) === facultyDept;
+                const staggerDelay = `${(index % 5) + 1}`;
+                return (
+                  <TableRow 
+                    key={student.student_id}
+                    className={`animate-slide-up stagger-${staggerDelay} transition-all duration-300 hover:bg-primary/5 ${(student.score || 0) < 50 ? 'bg-danger/5' : ''}`}
+                  >
+                    <TableCell className="font-mono text-sm">{student.student_id}</TableCell>
+                    <TableCell className="font-medium">{student.name}</TableCell>
+                    <TableCell className="hidden md:table-cell">{deptLabel(student.department)}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.semester}</TableCell>
+                    <TableCell>{student.attendance}%</TableCell>
+                    <TableCell className="hidden sm:table-cell">{student.avg_quiz}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{student.avg_assignment}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.stress_index}</TableCell>
+                    <TableCell className={(student.score || 0) < 50 ? 'text-danger font-semibold' : ''}>
+                      {(student.score || 0).toFixed(1)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getRiskBadgeVariant(student.risk_level)}>
+                        {student.risk_level?.replace(' Risk', '')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant={student.prediction === 'On Track' ? 'default' : 'secondary'}>
+                        {student.prediction}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {canView && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => navigate(`/admin/student/${student.student_id}`)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {canView && student.risk_level === 'High Risk' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-primary"
+                            onClick={() => sendMotivation(student.name)}
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };

@@ -369,16 +369,20 @@ const FacultyMessages: React.FC = () => {
 
           <div className="space-y-2">
             {conversations.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No conversations yet</p>
+              <div className="rounded-lg border-2 border-dashed border-border bg-secondary/20 p-6 text-center">
+                <MessageSquare className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground font-medium">No conversations yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Start chatting with a student</p>
+              </div>
             ) : (
               conversations.map((conv) => (
                 <button
                   key={conv.student_id}
                   onClick={() => setSelectedStudentId(conv.student_id)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
                     selectedStudentId === conv.student_id
-                      ? 'bg-primary/10 border-l-4 border-primary'
-                      : 'hover:bg-accent/5'
+                      ? 'bg-primary/10 border-l-4 border-primary shadow-sm'
+                      : 'hover:bg-accent/5 border-l-4 border-transparent'
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -388,7 +392,7 @@ const FacultyMessages: React.FC = () => {
                       <p className="text-xs text-muted-foreground truncate mt-1">{conv.last_message}</p>
                     </div>
                     {conv.unread_count > 0 && (
-                      <span className="ml-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs rounded-full">
+                      <span className="ml-2 px-2 py-0.5 bg-primary text-primary-foreground text-xs rounded-full animate-pulse">
                         {conv.unread_count}
                       </span>
                     )}
@@ -405,10 +409,13 @@ const FacultyMessages: React.FC = () => {
         {/* Chat Area */}
         <div className="bg-card rounded-2xl p-4 card-shadow md:col-span-2 flex flex-col h-[600px]">
           {!selectedStudentId ? (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                <p>Select a conversation or start a new chat</p>
+                <div className="p-4 rounded-2xl bg-primary/10 border-2 border-primary/20 w-fit mx-auto mb-4">
+                  <MessageSquare className="w-12 h-12 text-primary/60" />
+                </div>
+                <p className="text-muted-foreground font-medium">Select a conversation to start chatting</p>
+                <p className="text-xs text-muted-foreground mt-1">Choose a student from the list</p>
               </div>
             </div>
           ) : (
@@ -430,7 +437,13 @@ const FacultyMessages: React.FC = () => {
                 {isLoading ? (
                   <LoadingSkeleton variant="card" />
                 ) : messages.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No messages yet. Start the conversation!</p>
+                  <div className="h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <MessageSquare className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No messages yet</p>
+                      <p className="text-xs text-muted-foreground mt-1">Start the conversation!</p>
+                    </div>
+                  </div>
                 ) : (
                   messages.map((msg) => (
                     <div
