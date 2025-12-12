@@ -145,9 +145,10 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-primary/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-accent/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-secondary/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-20 -left-20 w-96 h-96 bg-primary/30 rounded-full filter blur-3xl opacity-80 animate-blob"></div>
+        <div className="absolute top-0 -right-20 w-96 h-96 bg-purple-500/30 rounded-full filter blur-3xl opacity-80 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-accent/30 rounded-full filter blur-3xl opacity-80 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-pink-500/20 rounded-full filter blur-3xl opacity-70 animate-blob animation-delay-3000"></div>
       </div>
 
       <div className="w-full max-w-md animate-fade-in relative z-10">
@@ -161,7 +162,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Login Card */}
-        <div className="bg-card rounded-2xl p-6 card-shadow-lg">
+        <div className="bg-card/80 backdrop-blur-xl rounded-2xl p-8 card-shadow-lg border-2 border-white/10 animate-scale-in">
           <h2 className="text-xl font-semibold text-foreground mb-6 text-center">
             {showForgotPassword ? 'Reset Password' : 'Welcome Back'}
           </h2>

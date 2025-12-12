@@ -66,11 +66,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header with animated gradient */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 p-6 border border-border animate-fade-in">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full filter blur-3xl animate-float"></div>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-accent/20 p-8 border-2 border-primary/20 shadow-2xl animate-fade-in">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/15 rounded-full filter blur-3xl animate-float animation-delay-2000"></div>
         <div className="relative z-10">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Welcome Back! 👋</h1>
-          <p className="text-muted-foreground">Here's your academic overview at a glance</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
+            <span className="text-5xl animate-bounce">👋</span>
+            Welcome Back!
+          </h1>
+          <p className="text-lg text-muted-foreground">Here's your academic overview at a glance</p>
         </div>
       </div>
 

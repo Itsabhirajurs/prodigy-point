@@ -310,17 +310,18 @@ const AdminDashboard: React.FC = () => {
     return (
       <div className="space-y-6 animate-fade-in">
         {/* Enhanced Header with gradient background */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 p-6 border border-border">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full filter blur-3xl animate-float"></div>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-purple-500/10 to-accent/20 p-8 border-2 border-primary/20 shadow-2xl">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl animate-float"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/15 rounded-full filter blur-3xl animate-float animation-delay-2000"></div>
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-xl bg-primary/20">
-                  <Shield className="w-6 h-6 text-primary" />
+                <div className="p-3 rounded-xl bg-primary/30 shadow-lg">
+                  <Shield className="w-8 h-8 text-primary" />
                 </div>
-                <h1 className="text-3xl font-bold text-foreground">Admin Console</h1>
+                <h1 className="text-4xl font-bold text-foreground">Admin Console</h1>
               </div>
-              <p className="text-muted-foreground">Manage faculty accounts and student credentials</p>
+              <p className="text-lg text-muted-foreground">Manage faculty accounts and student credentials</p>
             </div>
             <Button onClick={() => navigate('/admin/users')} className="gap-2 h-11 px-6">
               Manage Users
@@ -420,17 +421,18 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Enhanced Faculty Header with gradient background */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/10 via-primary/5 to-accent/5 p-6 border border-border">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full filter blur-3xl animate-float"></div>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/20 via-primary/10 to-purple-500/20 p-8 border-2 border-accent/20 shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary/15 rounded-full filter blur-3xl animate-float animation-delay-2000"></div>
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-xl bg-accent/20">
-                <GraduationCap className="w-6 h-6 text-accent" />
+              <div className="p-3 rounded-xl bg-accent/30 shadow-lg">
+                <GraduationCap className="w-8 h-8 text-accent" />
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Faculty Dashboard</h1>
+              <h1 className="text-4xl font-bold text-foreground">Faculty Dashboard</h1>
             </div>
-            <p className="text-muted-foreground">Overview of your department{facultyDept ? ` (${facultyDept})` : ''}</p>
+            <p className="text-lg text-muted-foreground">Overview of your department{facultyDept ? ` (${facultyDept})` : ''}</p>
           </div>
           <div className="flex gap-2">
             <Button 
