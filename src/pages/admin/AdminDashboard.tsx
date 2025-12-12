@@ -309,15 +309,24 @@ const AdminDashboard: React.FC = () => {
   if (isAdmin) {
     return (
       <div className="space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Admin Console</h1>
-            <p className="text-muted-foreground">Manage faculty accounts and student credentials</p>
+        {/* Enhanced Header with gradient background */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 p-6 border border-border">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full filter blur-3xl animate-float"></div>
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-xl bg-primary/20">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
+                <h1 className="text-3xl font-bold text-foreground">Admin Console</h1>
+              </div>
+              <p className="text-muted-foreground">Manage faculty accounts and student credentials</p>
+            </div>
+            <Button onClick={() => navigate('/admin/users')} className="gap-2 h-11 px-6">
+              Manage Users
+              <Shield className="w-4 h-4" />
+            </Button>
           </div>
-          <Button onClick={() => navigate('/admin/users')} className="gap-2">
-            Manage Users
-            <Shield className="w-4 h-4" />
-          </Button>
         </div>
 
         {/* Key counts */}
@@ -410,25 +419,34 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Faculty Dashboard</h1>
-          <p className="text-muted-foreground">Overview of your department{facultyDept ? ` (${facultyDept})` : ''}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={handleSyncData} 
-            disabled={isSyncing}
-            variant="outline"
-            className="gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
-            {isSyncing ? 'Syncing...' : 'Sync Data'}
-          </Button>
-          <Button onClick={() => navigate('/admin/students')} className="gap-2">
-            View All Students
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+      {/* Enhanced Faculty Header with gradient background */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/10 via-primary/5 to-accent/5 p-6 border border-border">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full filter blur-3xl animate-float"></div>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 rounded-xl bg-accent/20">
+                <GraduationCap className="w-6 h-6 text-accent" />
+              </div>
+              <h1 className="text-3xl font-bold text-foreground">Faculty Dashboard</h1>
+            </div>
+            <p className="text-muted-foreground">Overview of your department{facultyDept ? ` (${facultyDept})` : ''}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSyncData} 
+              disabled={isSyncing}
+              variant="outline"
+              className="gap-2 h-11 px-4"
+            >
+              <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Syncing...' : 'Sync Data'}
+            </Button>
+            <Button onClick={() => navigate('/admin/students')} className="gap-2 h-11 px-6">
+              View All Students
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 

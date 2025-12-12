@@ -65,11 +65,12 @@ const Dashboard: React.FC = () => {
   };
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Your academic overview</p>
+      {/* Header with animated gradient */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 p-6 border border-border animate-fade-in">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full filter blur-3xl animate-float"></div>
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold text-foreground mb-1">Welcome Back! 👋</h1>
+          <p className="text-muted-foreground">Here's your academic overview at a glance</p>
         </div>
       </div>
 

@@ -27,9 +27,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   description,
 }) => {
   return (
-    <div className="bg-card rounded-2xl p-5 card-shadow animate-fade-in">
+    <div className="bg-card rounded-2xl p-5 card-shadow animate-fade-in hover:card-shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group">
       <div className="flex items-start justify-between mb-4">
-        <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', variantStyles[variant])}>
+        <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110', variantStyles[variant])}>
           <Icon className="w-6 h-6 text-primary-foreground" />
         </div>
       </div>
