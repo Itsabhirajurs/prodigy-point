@@ -44,22 +44,26 @@ export const AttendanceChart: React.FC<{ currentValue?: number; data?: Attendanc
   }
 
   return (
-    <div className="bg-card rounded-2xl p-5 card-shadow">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Weekly Attendance Trend</h3>
+    <div className="bg-gradient-to-br from-card/95 via-card to-accent/5 rounded-2xl p-5 card-shadow border-2 border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-neon-lg group">
+      <h3 className="text-lg font-semibold text-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+        <span className="w-1 h-1 bg-accent rounded-full animate-pulse"></span>
+        Attendance Trends
+      </h3>
       <div className="h-64">
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">No attendance data available</div>
         ) : (
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis dataKey="week" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis domain={[50, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                border: '2px solid hsl(var(--accent))',
+                borderRadius: '12px',
+                boxShadow: '0 0 20px rgba(var(--accent), 0.3)',
               }}
               formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Attendance']}
             />
@@ -68,8 +72,9 @@ export const AttendanceChart: React.FC<{ currentValue?: number; data?: Attendanc
               dataKey="attendance"
               stroke="hsl(var(--primary))"
               strokeWidth={3}
-              dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 5 }}
+              activeDot={{ r: 7, fill: 'hsl(var(--accent))' }}
+              isAnimationActive={true}
             />
           </LineChart>
         </ResponsiveContainer>

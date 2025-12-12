@@ -20,12 +20,15 @@ export const InteractionChart: React.FC<{ interaction?: number; travelTime?: num
   }
 
   return (
-    <div className="bg-card rounded-2xl p-5 card-shadow">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Class Interaction vs Travel Time</h3>
+    <div className="bg-gradient-to-br from-card/95 via-card to-primary/5 rounded-2xl p-5 card-shadow border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-neon-lg group">
+      <h3 className="text-lg font-semibold text-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+        <span className="w-1 h-1 bg-primary rounded-full animate-pulse"></span>
+        Class Interaction vs Travel Time
+      </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis
               type="number"
               dataKey="travel"
@@ -51,15 +54,16 @@ export const InteractionChart: React.FC<{ interaction?: number; travelTime?: num
               cursor={{ strokeDasharray: '3 3' }}
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                border: '2px solid hsl(var(--primary))',
+                borderRadius: '12px',
+                boxShadow: '0 0 20px rgba(var(--primary), 0.3)',
               }}
               formatter={(value: number, name: string) => [
                 name === 'travel' ? `${value} min` : `${value}%`,
                 name === 'travel' ? 'Travel Time' : 'Interaction',
               ]}
             />
-            <Scatter name="Students" data={data} fill="hsl(var(--success))" />
+            <Scatter name="Students" data={data} fill="hsl(var(--success))" isAnimationActive={true} />
           </ScatterChart>
         </ResponsiveContainer>
       </div>

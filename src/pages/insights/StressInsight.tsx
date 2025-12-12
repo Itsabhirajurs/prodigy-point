@@ -75,32 +75,38 @@ const StressInsight: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl gradient-danger flex items-center justify-center">
-          <Brain className="w-7 h-7 text-destructive-foreground" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-destructive/20 via-warning/10 to-card p-8 border-2 border-destructive/30 shadow-2xl">
+        <div className="absolute inset-0 flex items-center justify-between pointer-events-none overflow-hidden">
+          <div className="absolute -left-32 top-1/4 w-64 h-64 bg-destructive/10 rounded-full filter blur-3xl animate-blob"></div>
+          <div className="absolute -right-32 bottom-1/4 w-80 h-80 bg-warning/5 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Stress & Behavior Tracker</h1>
-          <p className="text-muted-foreground">Monitor your wellbeing metrics</p>
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl gradient-danger flex items-center justify-center shadow-lg">
+            <Brain className="w-7 h-7 text-destructive-foreground" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold text-foreground uppercase tracking-wide">Stress & Behavior Tracker</h1>
+            <p className="text-muted-foreground text-lg">Monitor your wellbeing metrics and stress levels</p>
+          </div>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-card rounded-xl p-4 card-shadow text-center">
-          <Brain className="w-6 h-6 mx-auto mb-2 text-destructive" />
-          <p className="text-2xl font-bold text-foreground">{Math.round(student.stress_index)}%</p>
-          <p className="text-xs text-muted-foreground">Stress Index</p>
+        <div className="bg-gradient-to-br from-destructive/15 to-destructive/5 rounded-xl p-6 card-shadow text-center border-2 border-destructive/30 hover:border-destructive/60 transition-all hover:shadow-neon-lg hover:scale-105 group">
+          <Brain className="w-7 h-7 mx-auto mb-3 text-destructive group-hover:scale-125 transition-transform" />
+          <p className="text-3xl font-bold text-foreground">{Math.round(student.stress_index)}%</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-2">Stress Index</p>
         </div>
-        <div className="bg-card rounded-xl p-4 card-shadow text-center">
-          <Smartphone className="w-6 h-6 mx-auto mb-2 text-primary" />
-          <p className="text-2xl font-bold text-foreground">{student.social_media_hours.toFixed(1)}h</p>
-          <p className="text-xs text-muted-foreground">Social Media</p>
+        <div className="bg-gradient-to-br from-primary/15 to-primary/5 rounded-xl p-6 card-shadow text-center border-2 border-primary/30 hover:border-primary/60 transition-all hover:shadow-neon-lg hover:scale-105 group">
+          <Smartphone className="w-7 h-7 mx-auto mb-3 text-primary group-hover:scale-125 transition-transform" />
+          <p className="text-3xl font-bold text-foreground">{student.social_media_hours.toFixed(1)}h</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-2">Social Media</p>
         </div>
-        <div className="bg-card rounded-xl p-4 card-shadow text-center">
-          <Clock className="w-6 h-6 mx-auto mb-2 text-accent" />
-          <p className="text-2xl font-bold text-foreground">{Math.round(student.travel_time)}m</p>
-          <p className="text-xs text-muted-foreground">Travel Time</p>
+        <div className="bg-gradient-to-br from-accent/15 to-accent/5 rounded-xl p-6 card-shadow text-center border-2 border-accent/30 hover:border-accent/60 transition-all hover:shadow-neon-lg hover:scale-105 group">
+          <Clock className="w-7 h-7 mx-auto mb-3 text-accent group-hover:scale-125 transition-transform" />
+          <p className="text-3xl font-bold text-foreground">{Math.round(student.travel_time)}m</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-2">Travel Time</p>
         </div>
       </div>
 
@@ -124,20 +130,23 @@ const StressInsight: React.FC = () => {
 
       {/* Insights */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-foreground">Behavioral Insights</h2>
+        <h2 className="text-2xl font-bold text-foreground uppercase tracking-wide">Behavioral Insights</h2>
         {insights.map((insight, index) => {
           const Icon = insight.icon;
-          const bgColor = insight.type === 'success' ? 'bg-success/10' : insight.type === 'warning' ? 'bg-warning/10' : insight.type === 'danger' ? 'bg-destructive/10' : 'bg-primary/10';
+          const bgColor = insight.type === 'success' ? 'from-success/15 to-success/5' : insight.type === 'warning' ? 'from-warning/15 to-warning/5' : insight.type === 'danger' ? 'from-destructive/15 to-destructive/5' : 'from-primary/15 to-primary/5';
+          const borderColor = insight.type === 'success' ? 'border-success/30' : insight.type === 'warning' ? 'border-warning/30' : insight.type === 'danger' ? 'border-destructive/30' : 'border-primary/30';
           const iconColor = insight.type === 'success' ? 'text-success' : insight.type === 'warning' ? 'text-warning' : insight.type === 'danger' ? 'text-destructive' : 'text-primary';
           
           return (
-            <div key={index} className="bg-card rounded-xl p-4 card-shadow flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center flex-shrink-0`}>
-                <Icon className={`w-5 h-5 ${iconColor}`} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{insight.title}</h3>
-                <p className="text-sm text-muted-foreground">{insight.description}</p>
+            <div key={index} className={`bg-gradient-to-r ${bgColor} rounded-xl p-6 card-shadow border-2 ${borderColor} hover:border-opacity-60 transition-all hover:shadow-neon-lg hover:scale-102 group`}>
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-lg bg-${iconColor}/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                  <Icon className={`w-6 h-6 ${iconColor}`} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-foreground text-lg">{insight.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{insight.description}</p>
+                </div>
               </div>
             </div>
           );

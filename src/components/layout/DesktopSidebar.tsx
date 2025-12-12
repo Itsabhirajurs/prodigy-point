@@ -76,10 +76,10 @@ export const DesktopSidebar: React.FC = () => {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg shadow-primary/30 border border-primary/50 scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/10 hover:border-l-2 hover:border-primary'
                 )
               }
             >
@@ -97,10 +97,10 @@ export const DesktopSidebar: React.FC = () => {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-accent to-primary text-primary-foreground shadow-lg shadow-accent/30 border border-accent/50 scale-105'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/10 hover:border-l-2 hover:border-accent'
                 )
               }
             >
@@ -118,10 +118,10 @@ export const DesktopSidebar: React.FC = () => {
               to={item.to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300',
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    ? 'bg-gradient-to-r from-primary/80 to-primary text-primary-foreground shadow-lg shadow-primary/20 border border-primary/40'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-primary/5 hover:border-l-2 hover:border-primary/50'
                 )
               }
             >

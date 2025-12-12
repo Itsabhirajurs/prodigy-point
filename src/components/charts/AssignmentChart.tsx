@@ -23,29 +23,33 @@ export const AssignmentChart: React.FC<{ currentValue?: number; data?: Assignmen
   }
 
   return (
-    <div className="bg-card rounded-2xl p-5 card-shadow">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Assignment Scores Timeline</h3>
+    <div className="bg-gradient-to-br from-card/95 via-card to-warning/5 rounded-2xl p-5 card-shadow border-2 border-warning/20 hover:border-warning/40 transition-all duration-300 hover:shadow-neon-lg group">
+      <h3 className="text-lg font-semibold text-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
+        <span className="w-1 h-1 bg-warning rounded-full animate-pulse"></span>
+        Assignment Scores Timeline
+      </h3>
       <div className="h-64">
         {chartData.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">No assignment data available</div>
         ) : (
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
             <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
             <YAxis domain={[50, 100]} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                border: '2px solid hsl(var(--warning))',
+                borderRadius: '12px',
+                boxShadow: '0 0 20px rgba(var(--warning), 0.3)',
               }}
               formatter={(value, _name, props) => [`${value}%`, props.payload?.subject ? `Subject: ${props.payload.subject}` : 'Score']}
             />
             <defs>
               <linearGradient id="colorAssignment" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.6} />
+                <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <Area
@@ -54,6 +58,7 @@ export const AssignmentChart: React.FC<{ currentValue?: number; data?: Assignmen
               stroke="hsl(var(--accent))"
               strokeWidth={3}
               fill="url(#colorAssignment)"
+              isAnimationActive={true}
             />
           </AreaChart>
         </ResponsiveContainer>
